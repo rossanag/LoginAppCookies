@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "target": "esnext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "types": ["vite/client", "vitest/globals","jest"],
+    "allowJs": true,
+    "declaration": true,
+    "skipLibCheck": true,    
+    "esModuleInterop": false, 
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,           
+    "baseUrl": ".",    
+    "paths": {
+      "root/*": ["./*"],
+      "components/*": ["src/components/*"],
+      "common/*": ["src/components/common/*"],    
+    },        
+  },  
+  "include": ["src/**/*","src",  "**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "src/*","src/**/*.ts","src/**/*.tsx","src/**/*.jsx","src/**/*.vue","tests/**/*.ts","tests/**/*.tsx", "babel.config.cjs", "jest.config.cjs"],   
+  "exclude": ["node_modules",".vscode" ],
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "typeAcquisition": {
+		"enable": true
+	}
+}
