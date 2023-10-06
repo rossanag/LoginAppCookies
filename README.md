@@ -6,15 +6,20 @@
 
 It began as project to understand OAuth2 protocol for authentication, but as things were caming I decided to go further to cover the different concepts involved in a webapp development.
 Therefore the name of this repository (LoginApp) is misleading, since it will be a more complete fullstack app.
+I decided to sent the token with httpOnly cookies instead of storing them in localstorage, for segurity reasons. It helps to mitigate XSS attacks, I recommend this readings:
+- [OAuth. token storage](https://fusionauth.io/articles/oauth/oauth-token-storage)
+- [A guide for SPA](https://authguidance.com/spa-back-end-for-front-end/) client-server app.
+
 
 I will summarize the aspects that are involved, **to delve into them later**:
+
 
 - [OAuth2](https://oauth.net/2/) protocol for authentication
 - Global state with Redux
 - Managing routes in UX
-- Server app with [Node](https://nodejs.org/)
+- Server app with [Node 18](https://nodejs.org/)
 - [MongoDB](https://www.mongodb.com/) for practicing non relational database
-- Testing
+- Testing (Vitest)
 
 ### Libraries/plugins added to this project@Silvana llamé a Rosi, y está al tanto
 
