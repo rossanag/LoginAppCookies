@@ -9,8 +9,7 @@ const About = () => {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const resp = await apiGoogle.post(aboutURL);
-				console.log('resp.data en About ', resp.data);
+				const resp = await apiGoogle.post(aboutURL);				
 				setAboutData(resp.data);
 			} catch (error) {
 				console.log('error en About ', error);

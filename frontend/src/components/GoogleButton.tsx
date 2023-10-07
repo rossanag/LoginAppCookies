@@ -18,7 +18,7 @@ border: string;
  */
 export default function GoogleButton( props:{onClick:()=> void}):JSX.Element {
 	return (
-		<Button className='hover:bg-sky-800 focus:bg-sky-900 flex items-center space-x-2' color="bg-sky-700" width="100" height="400" radius="20" onClick={props.onClick} >
+		<Button className='hover:bg-sky-800 focus:bg-sky-900 flex justify-center items-center space-x-2' color="bg-sky-700" width="100" height="400" radius="20" onClick={props.onClick} >
 			<img src={googleLogo} alt="Google Logo" /><span>Sign In</span>
 		</Button> 
     

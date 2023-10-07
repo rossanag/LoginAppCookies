@@ -8,9 +8,7 @@ interface IProps {
 }
 
 const ProtectedRoute = ( {children}: IProps ): JSX.Element => {
-	const [user,] = useLocalStorage<User | null>('user',null);	
-
-	console.log('protected route user', user);
+	const [user,] = useLocalStorage<User | null>('user',null);		
     
 	if (!user) {
 		return <Navigate to="/" />;
