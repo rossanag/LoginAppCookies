@@ -8,7 +8,7 @@ dotenv.config();
 
 import cors from 'cors';
 
-import { OAuth2Client, UserRefreshClient } from 'google-auth-library';
+// import { OAuth2Client, UserRefreshClient } from 'google-auth-library';
 import axios from 'axios';
 const app = express();
 
@@ -16,8 +16,12 @@ import url from 'url';
 import cookieParser from 'cookie-parser';
 
 import corsOptions from './config/corsOptions.js';
-import setGmailAuth from './controllers/gmaiControllers.js';
+import {setGmailAuth} from './controllers/gmaiControllers.js';
 import createGmailRoutes from './routes/gmailRoutes.js';
+import createCommonRoutes from './routes/common.js';
+
+import credentials from './middleware/credentials.js';
+
 
 app.use(cors(corsOptions)); 
 app.use(express.json());
@@ -28,98 +32,6 @@ app.use(express.urlencoded({ extended: true }));
 const oAuth2Client = setGmailAuth();
 createGmailRoutes(app, oAuth2Client)
 
-/* app.get('/oauth2callback', async (req, res) => {
-  const today = new Date();
-  const { tokens } = await oAuth2Client.getToken(req.query.code);
-  res
-    .cookie('@react-oauth/google_ACCESS_TOKEN', tokens.access_token, {
-      httpOnly: true,
-      secure: true,
-      maxAge: 1 * 60 * 60 * 1000,
-    })
-    .cookie('@react-oauth/google_REFRESH_TOKEN', tokens.refresh_token, {
-      httpOnly: true,
-      secure: true,
-      expires: new Date(today.getFullYear(), today.getMonth() + 6),
-    })
-    .redirect(301, process.env.URL_ORIGIN);
-});
-
-
-const getUser = async (tokens) => {
-  const gtokens = {
-    access_token: tokens.access_token,
-    refresh_token: tokens.refresh_token,
-    id_token: tokens.id_token,
-    expiry_date : tokens.expiry_date
-  } 
-
-  let user = {}   
-  if (tokens.access_token) {
-    try {
-
-        let resp = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokens.access_token}`, {          
-            headers: {
-                Authorization: `Bearer ${tokens.access_token}`,
-                Accept: 'application/json',               
-            }
-        })                         
-        console.log('resp.data ', resp.data)
-        user = {
-          ...resp.data,
-          gtokens         
-        }           
-        // if the user exists, if it's not already in the database, save it
-        // if not exists, send the message to the client
-        console.log('user in server ', user);                  
-    }    
-    catch(err) { 
-      console.log(err)         
-      // instead of err.message we use a more UX friendly approach  
-      res.status(500).send("Please, try again later")
-        
-    };
-  } 
- 
-  return user;
-
-}
-
-app.post('/auth/google/refresh-token', async (req, res) => {
-  const user = new UserRefreshClient(//console.log('about')
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    req.body.refreshToken,
-  );
-  // check if it exists in our database
-  // if exists, then check if it is expired, if not exist send 403.  
-  
-  const { credentials } = await user.refreshAccessToken(); // otain new tokens
-  res.json(credentials);
-})
-
-
-app.post('/oauth/google', async (req, res) => {
-  
-  const { tokens } = await oAuth2Client.getToken(req.body.code); // exchange code for tokens
-  oAuth2Client.setCredentials(tokens);
-
-  try {
-    const user = await getUser(tokens);
-    console.log('\nObjeto de Usuario ', user)
-  
-    res.json(user);     
-    
-  }
-  catch(err) {
-    console.log('Error al enviar usuario', err)
-    res.status(500).send(err.message)
-  }
-      
-});
- */
-app.post('/about', async (req, res) => {  
-  res.send('This is About page data from server').status(200)
-});
+createCommonRoutes(app);
 
 app.listen(process.env.PORT, () => console.log(`Server is running at port`, process.env.PORT));

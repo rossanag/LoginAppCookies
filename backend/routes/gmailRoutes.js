@@ -1,4 +1,4 @@
-import { OAuth2Client, UserRefreshClient } from 'google-auth-library';
+import { UserRefreshClient } from 'google-auth-library';
 import axios from 'axios';
 
 const createGmailRoutes = (app, oAuth2Client) => {
@@ -22,13 +22,13 @@ const createGmailRoutes = (app, oAuth2Client) => {
     
     
     const getUser = async (tokens) => {
-        const gtokens = {
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
-        id_token: tokens.id_token,
-        expiry_date : tokens.expiry_date
-        } 
-    
+        const userTokens = {
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token,
+        //id_token: tokens.id_token,
+        // expiry_date : tokens.expiry_date
+        }
+            
         let user = {}   
         if (tokens.access_token) {
         try {
@@ -40,9 +40,15 @@ const createGmailRoutes = (app, oAuth2Client) => {
                 }
             })                         
             console.log('resp.data ', resp.data)
+            const userData = {
+                name: resp.data.name,
+                email: resp.data.email,
+                pic: resp.data.picture,
+                authMode: 'google'         
+            }
             user = {
-                ...resp.data,
-                gtokens         
+                userData,
+                userTokens
             }           
             // if the user exists, if it's not already in the database, save it
             // if not exists, send the message to the client
@@ -61,14 +67,21 @@ const createGmailRoutes = (app, oAuth2Client) => {
     }
         
     app.post('/oauth/google', async (req, res) => {
-        
+                
         const { tokens } = await oAuth2Client.getToken(req.body.code); // exchange code for tokens
         oAuth2Client.setCredentials(tokens);
-    
+        
         try {
         const user = await getUser(tokens);
         console.log('\nObjeto de Usuario ', user)
         
+         // Set the refresh token in a cookie with a secure and httpOnly flag - NEW!
+         res.cookie('refreshToken', tokens.refresh_token, {
+            secure: false, // true - Requires HTTPS
+            httpOnly: true, // Cookie cannot be accessed by JavaScript
+            maxAge: tokens.expires_in * 1000, // Set the expiration time based on token validity
+        });
+    
         res.json(user);     
         
         }
@@ -79,14 +92,19 @@ const createGmailRoutes = (app, oAuth2Client) => {
     });
 
     app.post('/auth/google/refresh-token', async (req, res) => {
-        const user = new UserRefreshClient(//console.log('about')
+        const user = new UserRefreshClient(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET,
         req.body.refreshToken,
         );
         // check if it exists in our database
         // if exists, then check if it is expired, if not exist send 403.  
-        
+        res.cookie('refreshToken', tokens.refresh_token, {
+            secure: false, // true - Requires HTTPS
+            httpOnly: true, // Cookie cannot be accessed by JavaScript
+            maxAge: tokens.expires_in * 1000, // Set the expiration time based on token validity
+        });
+
         const { credentials } = await user.refreshAccessToken(); // otain new tokens
         res.json(credentials);
     })    
