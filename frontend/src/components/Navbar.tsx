@@ -17,10 +17,11 @@ const Navbar = () => {
 	const [user,] = useLocalStorage<User | null>('user',null);
 
 	useEffect(() => {		
-		setIsLogged(true);
-		console.log('en Navbar isLogged ', isLogged);
+		if (user?.email) {			
+			setIsLogged(true);			
+		}	
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [user]);
+	}, [user?.email]);
 
 
 	return (

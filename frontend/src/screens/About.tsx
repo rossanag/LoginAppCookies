@@ -2,14 +2,15 @@ import { apiGoogle } from '../api/apiAxios';
 import { useState, useEffect } from 'react';
 
 
-const About = () => {
-	const aboutURL = import.meta.env.VITE_SEVER_ENDPOINT + '/about' as string;
+const About = () => {									 
+	const aboutURL = import.meta.env.VITE_SERVER_ENDPOINT + '/about' as string;	
 	const [aboutData, setAboutData] = useState<string | undefined>();
 
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
 				const resp = await apiGoogle.post(aboutURL);
+				console.log('resp.data en About ', resp.data);
 				setAboutData(resp.data);
 			} catch (error) {
 				console.log('error en About ', error);

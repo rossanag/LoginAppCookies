@@ -33,7 +33,8 @@ const Login = () => {
 			console.log('user en getUser ', user);
 			console.log('gtokens en getUser ', gtokens);	
 			
-			//axios.defaults.headers.common['Authorization'] = 'Bearer ' + gtokens['access_token'];
+			
+			axios.defaults.headers.common['Authorization'] = 'Bearer ' + gtokens['access_token'];
 			// after any request we have the user authenticated with this sentences
 												
 			return user as User;
