@@ -16,7 +16,8 @@ import url from 'url';
 import cookieParser from 'cookie-parser';
 
 import corsOptions from './config/corsOptions.js';
-import setGmailAuth from './controllers/gmailControllers/gmaiControllers.js';
+import setGmailAuth from './controllers/gmaiControllers.js';
+import createGmailRoutes from './routes/gmailRoutes.js';
 
 app.use(cors(corsOptions)); 
 app.use(express.json());
@@ -25,8 +26,9 @@ app.use(express.urlencoded({ extended: true }));
 
 
 const oAuth2Client = setGmailAuth();
+createGmailRoutes(app, oAuth2Client)
 
-app.get('/oauth2callback', async (req, res) => {
+/* app.get('/oauth2callback', async (req, res) => {
   const today = new Date();
   const { tokens } = await oAuth2Client.getToken(req.query.code);
   res
@@ -115,7 +117,7 @@ app.post('/oauth/google', async (req, res) => {
   }
       
 });
-
+ */
 app.post('/about', async (req, res) => {  
   res.send('This is About page data from server').status(200)
 });
