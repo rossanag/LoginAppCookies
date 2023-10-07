@@ -1,4 +1,5 @@
-import {allowedOrigins} from './allowedOrigins';
+import allowedOrigins from "./allowedOrigins.js";
+//allowedOrigins = require('./allowedOrigins');
 
 const corsOptions = {
     origin: (origin, callback) => {
@@ -8,7 +9,11 @@ const corsOptions = {
             callback(new Error('Not allowed by CORS'));
         }
     },
+    methods: "GET,POST,PUT,DELETE,OPTIONS",
+    credentials:true,         
     optionsSuccessStatus: 200
 }
 
-module.exports = corsOptions;
+//module.exports = corsOptions;
+
+export default corsOptions;

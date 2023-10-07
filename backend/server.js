@@ -1,59 +1,30 @@
 
 // const jwt = require("jsonwebtoken");
 
-const express = require("express");
-require('dotenv').config();
-const cors = require("cors");
+import express from 'express';
 
-const { OAuth2Client, UserRefreshClient } = require("google-auth-library");
+import dotenv from 'dotenv';
+dotenv.config();
+
+import cors from 'cors';
+
+import { OAuth2Client, UserRefreshClient } from 'google-auth-library';
+import axios from 'axios';
 const app = express();
 
-const axios = require('axios');
-const url = require('url');
-const cookieParser = require('cookie-parser');
+import url from 'url';
+import cookieParser from 'cookie-parser';
 
+import corsOptions from './config/corsOptions.js';
+import setGmailAuth from './controllers/gmailControllers/gmaiControllers.js';
 
-app.use(
-  cors({
-    // origin: [process.env.URL_ORIGIN],
-   origin: '*',
-    methods: "GET,POST,PUT,DELETE,OPTIONS",
-    credentials:true,         
-    optionSuccessStatus:200
-  })
-);
-
+app.use(cors(corsOptions)); 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* app.use(function (req, res, next) {
-  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
-  // res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-  next();
-});
- */
 
-const oAuth2Client = new OAuth2Client(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  'postmessage',  
-);
-
-oAuth2Client.on('tokens', (tokens) => {
-  //save refresh_toke
-  if (tokens.refresh_token) {
-    console.log('refresh token ', tokens.refresh_token);
-  }
-  console.log('access token ', tokens.access_token);
-});
-
-oAuth2Client.setCredentials({
-  refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
-  forceRefreshOnFailure: true
-});
-
+const oAuth2Client = setGmailAuth();
 
 app.get('/oauth2callback', async (req, res) => {
   const today = new Date();
@@ -71,20 +42,6 @@ app.get('/oauth2callback', async (req, res) => {
     })
     .redirect(301, process.env.URL_ORIGIN);
 });
-
-
-async function verifyGoogleToken(token) {
-  try {
-    const ticket = await oAuth2Client.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-    console.log('ticket obtenido al verificar ',ticket)
-    return { payload: ticket.getPayload() };
-  } catch (error) {
-      return { error: "Invalid user detected. Please try again" };
-  }
-}
 
 
 const getUser = async (tokens) => {
@@ -135,7 +92,7 @@ app.post('/auth/google/refresh-token', async (req, res) => {
   // check if it exists in our database
   // if exists, then check if it is expired, if not exist send 403.  
   
-  const { credentials } = await user.refreshAccessToken(); // optain new tokens
+  const { credentials } = await user.refreshAccessToken(); // otain new tokens
   res.json(credentials);
 })
 
@@ -163,4 +120,4 @@ app.post('/about', async (req, res) => {
   res.send('This is About page data from server').status(200)
 });
 
-app.listen(process.env.PORT, () => console.log(`Server is running`));
+app.listen(process.env.PORT, () => console.log(`Server is running at port`, process.env.PORT));
