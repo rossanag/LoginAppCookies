@@ -25,8 +25,8 @@ const createGmailRoutes = (app, oAuth2Client) => {
         const userTokens = {
             access_token: tokens.access_token,
             refresh_token: tokens.refresh_token,
-        //id_token: tokens.id_token,
-        // expiry_date : tokens.expiry_date
+            //id_token: tokens.id_token,
+            // expiry_date : tokens.expiry_date
         }
             
         let user = {}   
@@ -40,14 +40,16 @@ const createGmailRoutes = (app, oAuth2Client) => {
                 }
             })                         
             console.log('resp.data ', resp.data)
-            const userData = {
+            
+            const userInfo = {
                 name: resp.data.name,
                 email: resp.data.email,
-                pic: resp.data.picture,
+                picture: resp.data.picture,
                 authMode: 'google'         
             }
+
             user = {
-                userData,
+                userInfo,
                 userTokens
             }           
             // if the user exists, if it's not already in the database, save it
@@ -79,7 +81,7 @@ const createGmailRoutes = (app, oAuth2Client) => {
          res.cookie('refreshToken', tokens.refresh_token, {
             secure: false, // true - Requires HTTPS
             httpOnly: true, // Cookie cannot be accessed by JavaScript
-            maxAge: tokens.expires_in * 1000, // Set the expiration time based on token validity
+            // maxAge: tokens.expires_in * 1000, // Set the expiration time based on token validity
         });
     
         res.json(user);     
@@ -93,16 +95,16 @@ const createGmailRoutes = (app, oAuth2Client) => {
 
     app.post('/auth/google/refresh-token', async (req, res) => {
         const user = new UserRefreshClient(
-        process.env.GOOGLE_CLIENT_ID,
-        process.env.GOOGLE_CLIENT_SECRET,
-        req.body.refreshToken,
+            process.env.GOOGLE_CLIENT_ID,
+            process.env.GOOGLE_CLIENT_SECRET,
+            req.body.refreshToken,
         );
         // check if it exists in our database
         // if exists, then check if it is expired, if not exist send 403.  
         res.cookie('refreshToken', tokens.refresh_token, {
             secure: false, // true - Requires HTTPS
             httpOnly: true, // Cookie cannot be accessed by JavaScript
-            maxAge: tokens.expires_in * 1000, // Set the expiration time based on token validity
+            // maxAge: tokens.expires_in * 1000, // Set the expiration time based on token validity
         });
 
         const { credentials } = await user.refreshAccessToken(); // otain new tokens
