@@ -16,7 +16,7 @@ import url from 'url';
 import cookieParser from 'cookie-parser';
 
 import corsOptions from './config/corsOptions.js';
-import {setGmailAuth} from './controllers/gmaiControllers.js';
+import {setGmailAuth} from './controllers/gmailControllers.js';
 import createGmailRoutes from './routes/gmailRoutes.js';
 import createCommonRoutes from './routes/common.js';
 
