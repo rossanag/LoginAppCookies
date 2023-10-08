@@ -1,9 +1,9 @@
 import { useLocalStorage } from '../hooks';
-import { User } from '../types';
+import { UserData } from '../types';
 
 
 const Home = () => {
-	const [ user ] = useLocalStorage<User | null>('user', null);
+	const [ user ] = useLocalStorage<UserData | null>('user', null);
 	console.log('user en Home ', user);	
 	
 

@@ -38,7 +38,6 @@ const Button = ({
 }: Props): JSX.Element => {
 	const disabledStyle = disabled ? 'opacity-50 cursor-not-allowed' : 'transition ease-in-out duration-300 hover:cursor-pointer';
   
-	
 	let baseClasses = ['uppercase','font-oswald',__textSize, __border[type],__backgroundColors[type],__color[type],__padding, disabledStyle];
   
 	if (className) {

@@ -6,38 +6,39 @@ import { CodeResponse, useGoogleLogin, GoogleOAuthProvider  } from '@react-oauth
 import { apiGoogle }  from '../api/apiAxios';
 import GoogleButton from './GoogleButton';
 import { useLocalStorage } from '../hooks';
-import {User} from '../types';
+import {User, UserData} from '../types';
+
 
 
 const Login = () => {
 	
 	// const [user, setUser] = useState<User | null>(null);	
-	const [user, setUser] = useLocalStorage<User | null>('user', null);	
+	const [user, setUser] = useLocalStorage<UserData | null>('user', null);	
 	const [, setCodeResponse] = useState<CodeResponse | null >();		
 	const [error, setError] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(false);
 
 	const navigate = useNavigate();
 
-	const getUser = async(token: CodeResponse): Promise<User> => {		
+	const getUser = async(token: CodeResponse): Promise<UserData> => {		
 		const controller = new AbortController();
 
 		try {			
 			setLoading(true);
 
-			const data  = await apiGoogle.post(import.meta.env.VITE_GOOGLE_OAUTH_ENDPOINT as string,  token, { signal: controller.signal});												
-			const user = data.data;
-			const gtokens = data.data.gtokens;
+			const data = await apiGoogle.post<User>(import.meta.env.VITE_GOOGLE_OAUTH_ENDPOINT as string, token, { signal: controller.signal });			
+			const user = data.data.userInfo;
+			const userTokens = data.data.userTokens;
 			setError(false);			
 
-			console.log('user en getUser ', user);
-			console.log('gtokens en getUser ', gtokens);	
-			
-			
-			axios.defaults.headers.common['Authorization'] = 'Bearer ' + gtokens['access_token'];
+			console.log('user en getUser ', data.data);
+			console.log('userData en getUser ', user);
+			console.log('tokens en getUser ', userTokens);
+
+			//axios.defaults.headers.common['Authorization'] = 'Bearer ' + userTokens['access_token'];
 			// after any request we have the user authenticated with this sentences
-												
-			return user as User;
+
+			return user;
 		} catch (error) {
 			setError(true);		
 			if (axios.isCancel(error)) {
@@ -52,7 +53,7 @@ const Login = () => {
 			setLoading(false);
 		}		
 		
-		return {} as User;
+		return {} as UserData;
 		
 	};
 		
@@ -60,13 +61,13 @@ const Login = () => {
 	const googleLogin = useGoogleLogin({				
 		onSuccess: async (code ) => {				
 			try {
-				const userInfo = await getUser(code );				
+				const userInfo = (await getUser(code ));								
 				setCodeResponse(code);			
 				setUser(userInfo);	
-				//console.log('user en googleLogin ', userInfo);			
+				console.log('user en googleLogin ', userInfo);			
 			}
 			catch (error) {
-				console.log('Hubo un error al recuperar los datos del usuario ', error);
+				console.log('There was an error when retrieving user information. Please, try later ', error);
 			}
 			
 		},
@@ -91,10 +92,10 @@ const Login = () => {
 			<GoogleButton onClick={googleLogin}/>			
 			<br></br><br></br>
 			{error ? 
-				<p>Hubo un error al recuperar los datos del usuario</p> 
+				<p>There was an error when trying to login. Please try later</p> 
 				:
-				(loading ?	<p>Cargando...</p> :
-					!user ? null :	<p>Cargó usuario {user?.name}</p>) 					 									 										
+				(loading ?	<p>Loading...</p> :
+					!user ? null :	<p>User loaded {user?.name}</p>) 					 									 										
 			}			
 		</>
 	);		

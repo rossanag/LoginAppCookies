@@ -1,11 +1,10 @@
 import { useLocalStorage } from '../hooks';
-import  { User }  from '../types';
+import  { UserData }  from '../types';
 
 
 const Profile = () => {
-
-	//const user = JSON.parse(localStorage.getItem('user') as string) as User;
-	const [user, ] = useLocalStorage<User | null>('user', null);	
+	
+	const [user, ] = useLocalStorage<UserData | null>('user', null);	
 
 	return (
 		<>

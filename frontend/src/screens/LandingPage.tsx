@@ -7,7 +7,7 @@ import Logout from './Logout';
 import { LoginGoogle, Navbar, ProtectedRoute, AnonymousRoute} from '../components';
 import Profile from './Profile';
 
-import {User} from './../types';
+import {UserData} from './../types';
 import { useLocalStorage } from '../hooks';
 
 
@@ -15,7 +15,7 @@ const LandingPage = () => {
 	
 	// const user : User = JSON.parse(localStorage.getItem('user' ) as string) ;
 
-	const [user, ] = useLocalStorage<User | null>('user', null);	
+	const [user, ] = useLocalStorage<UserData | null>('user', null);	
 	
 	if (!user) console.log('No hay user en landing page');
 

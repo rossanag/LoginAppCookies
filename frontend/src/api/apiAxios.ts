@@ -12,7 +12,7 @@ export const refreshToken = async (user:User) => {
 	const controller = new AbortController();
 
 	
-	const refreshToken = user.gtokens.refresh_token;	
+	const refreshToken = user.userTokens.refresh_token;	
 	try {
 		const { data } = await axios.post(
 			'/auth/google/refresh-token',

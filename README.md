@@ -10,9 +10,7 @@ I decided to sent the token with httpOnly cookies instead of storing them in loc
 - [OAuth. token storage](https://fusionauth.io/articles/oauth/oauth-token-storage)
 - [A guide for SPA](https://authguidance.com/spa-back-end-for-front-end/) client-server app.
 
-
 I will summarize the aspects that are involved, **to delve into them later**:
-
 
 - [OAuth2](https://oauth.net/2/) protocol for authentication
 - Global state with Redux
@@ -35,6 +33,10 @@ Operative System: Ubuntu 22.04 LTS
 
 - **backend**  : the backend code folder. To run the server, get into this carpet and type: `npm start`
 - **frontend** : the frontend code folder. Get into this folder and type to launch the webapp: `npm run dev`
+
+**Note :**  When loging with Google OAuth and error appears:  
+> Cross-Origin-Opener-Policy policy would block the window.closed call error while using google auth
+It [happens on Chrome](https://github.com/vercel/next.js/discussions/51135), Brave, but not in Firefox.
 
 ### Libraries/plugins added to this project
 

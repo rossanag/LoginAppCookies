@@ -1,15 +1,18 @@
-type GTokens = {
+type UserTokens = {
 	access_token: string;
-	refresh_token: string;
-	id_token: string;
-	expiry_date: number;
+	refresh_token: string;	
 }
 
-type User = {
+type UserData = {
 	name: string;
 	email: string;
 	picture: string;
-	gtokens: GTokens;	
+	authMode: string;
 }
 
-export type { User, GTokens };
+type User = {
+	userInfo: UserData;
+	userTokens: UserTokens;
+}
+
+export type { User, UserTokens, UserData };

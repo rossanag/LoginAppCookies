@@ -1,2 +1,3 @@
 export type {User} from './types';
-export type {GTokens} from './types';
+export type {UserTokens} from './types';
+export type {UserData} from './types';

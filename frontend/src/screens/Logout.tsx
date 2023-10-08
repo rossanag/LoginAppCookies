@@ -1,27 +1,35 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User } from '../types';
+import { UserData } from '../types';
 import { useLocalStorage } from '../hooks';
+import { AUTH_USER } from '../api/authMode';
+
 
 const Logout = () => {
-    
-	localStorage.clear();
-	const[user,,clear] = useLocalStorage<User | null>('user', null);	
+	const [user, , clear] = useLocalStorage<UserData | null>('user', null);
 
-	
 	console.log('user en logout ', user);
-	
+
 	const navigate = useNavigate();
-		
+
 	useEffect(() => {
-		clear();
-		navigate('/'); 
-
-		// navigate(0);
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
+		const logout = async () => {
+			try {
+				const userAuth = user?.authMode as keyof typeof AUTH_USER;
+				await AUTH_USER[userAuth]();
+				clear();
+				navigate('/');
+			} catch (error) {
+				console.log('error en Logout ', error);
+				//Change this to a toast
+			}
+		};
+		logout();
+	}, [clear, navigate, user]);
+	
 	return <div />;
 };
+
+
 
 export default Logout;

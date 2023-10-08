@@ -1,7 +1,7 @@
 import {useState, useEffect } from 'react';
 
 import { NavLink } from 'react-router-dom';
-import { User } from '../types';
+import { UserData } from '../types';
 import { useLocalStorage } from '../hooks';
 
 const Navbar = () => {
@@ -14,7 +14,7 @@ const Navbar = () => {
 	
 	
 	// const  user : User = JSON.parse(localStorage.getItem('user' ) as string);
-	const [user,] = useLocalStorage<User | null>('user',null);
+	const [user,] = useLocalStorage<UserData | null>('user',null);
 
 	useEffect(() => {		
 		if (user?.email) {			
