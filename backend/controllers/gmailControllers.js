@@ -1,11 +1,7 @@
-
 import { OAuth2Client} from 'google-auth-library';
 
-  /**
 
- * @returns {OAuth2Client}
- */
-  export const setGmailAuth = () => {
+export const setGmailAuth = () => {
     const oAuth2Client = new OAuth2Client(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET,
@@ -26,7 +22,7 @@ import { OAuth2Client} from 'google-auth-library';
       });
     
       return  oAuth2Client;
-  }
+}
 
   /* const User = require('../model/User');
   const bcrypt = require('bcrypt');
