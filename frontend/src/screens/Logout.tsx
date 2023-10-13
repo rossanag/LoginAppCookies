@@ -16,7 +16,8 @@ const Logout = () => {
 		const logout = async () => {
 			try {
 				const userAuth = user?.authMode as keyof typeof AUTH_USER;
-				await AUTH_USER[userAuth]();
+				const resp = await AUTH_USER[userAuth]();
+				console.log('resp en Logout ', resp);  // toast
 				clear();
 				navigate('/');
 			} catch (error) {

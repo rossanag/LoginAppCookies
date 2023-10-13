@@ -1,9 +1,11 @@
 import { apiGoogle } from './apiAxios';
 
 
-// types of authentication
+// types of authentication to avoid ifs
 const logoutGmail =  async () => {
-	return await apiGoogle.post('/logoutGmail');	
+	const urlLogout = import.meta.env.VITE_GOOGLE_OAUTH_ENDPOINT + '/logout'; 	
+	console.log('urlLogout de gmail', urlLogout);
+	return await apiGoogle.post(urlLogout);	
 };
 
 const logoutJwt = async () => {

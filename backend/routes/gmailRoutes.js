@@ -1,7 +1,11 @@
-import { UserRefreshClient } from 'google-auth-library';
 import axios from 'axios';
+import { UserRefreshClient } from 'google-auth-library';
+import { setGmailAuth } from '../controllers/gmaiControllers.js';
 
-const createGmailRoutes = (app, oAuth2Client) => {
+
+const createGmailRoutes = (app) => {
+
+    const oAuth2Client = setGmailAuth();
 
     app.get('/oauth2callback', async (req, res) => {
         const today = new Date();
@@ -93,7 +97,7 @@ const createGmailRoutes = (app, oAuth2Client) => {
         }            
     });
 
-    app.post('/auth/google/refresh-token', async (req, res) => {
+    app.post('/oauth/google/refresh-token', async (req, res) => {
         const user = new UserRefreshClient(
             process.env.GOOGLE_CLIENT_ID,
             process.env.GOOGLE_CLIENT_SECRET,
@@ -110,6 +114,12 @@ const createGmailRoutes = (app, oAuth2Client) => {
         const { credentials } = await user.refreshAccessToken(); // otain new tokens
         res.json(credentials);
     })    
+
+    app.post('/oauth/google/logout', async (req, res) => {
+        console.log('Logout de Gmail')
+        res.clearCookie('refreshToken');
+        res.send('Logged out');
+    });
 }
 
 export default createGmailRoutes;

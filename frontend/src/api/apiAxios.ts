@@ -15,7 +15,7 @@ export const refreshToken = async (user:User) => {
 	const refreshToken = user.userTokens.refresh_token;	
 	try {
 		const { data } = await axios.post(
-			'/auth/google/refresh-token',
+			'/oauth/google/refresh-token',  
 			{
 				refreshToken: refreshToken,
 			},
