@@ -29,6 +29,7 @@ const Login = () => {
 			const data = await apiGoogle.post<User>(import.meta.env.VITE_GOOGLE_OAUTH_ENDPOINT as string, token, { signal: controller.signal });			
 			const user = data.data.userInfo;
 			const userTokens = data.data.userTokens;
+			//ToDo: save tokens in local storage or redux
 			setError(false);			
 
 			console.log('user en getUser ', data.data);

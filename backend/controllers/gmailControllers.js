@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { OAuth2Client} from 'google-auth-library';
 
 
@@ -98,4 +99,50 @@ export const setGmailAuth = () => {
       }
   }
   
+  export const getUser = async (tokens) => {
+    const userTokens = {
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        //id_token: tokens.id_token,
+        // expiry_date : tokens.expiry_date
+    }
+       
+    let user = {}   
+    if (tokens.access_token) {
+    try {
+
+        let resp = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokens.access_token}`, {          
+            headers: {
+                Authorization: `Bearer ${tokens.access_token}`,
+                Accept: 'application/json',               
+            }
+        })                         
+        console.log('resp.data ', resp.data)
+        
+        const userInfo = {
+            name: resp.data.name,
+            email: resp.data.email,
+            picture: resp.data.picture,
+            authMode: 'google'         
+        }
+
+        user = {
+            userInfo,
+            userTokens
+        }           
+        // if the user exists, if it's not already in the database, save it
+        // if not exists, send the message to the client
+        console.log('user in server ', user);                  
+    }    
+    catch(err) { 
+        console.log(err)         
+        // instead of err.message we use a more UX friendly approach  
+        res.status(500).send("Please, try again later")
+        
+    };
+    } 
+
+    return user;
+}
+
   
