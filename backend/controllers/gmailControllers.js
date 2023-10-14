@@ -125,7 +125,7 @@ export const setGmailAuth = () => {
             picture: resp.data.picture,
             authMode: 'google'         
         }
-
+    
         user = {
             userInfo,
             userTokens

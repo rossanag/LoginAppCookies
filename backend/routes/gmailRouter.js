@@ -2,6 +2,7 @@ import {Router} from 'express';
 import { UserRefreshClient } from 'google-auth-library';
 
 import { getUser, setGmailAuth } from '../controllers/gmailControllers.js';
+import { validateUserInfo } from '../schemas/user.js';
 
 
 const gmailRouter = Router();
@@ -36,6 +37,13 @@ gmailRouter.post('/', async (req, res) => {
         try {
             const user = await getUser(tokens);
             console.log('\nObjeto de Usuario ', user)
+
+            
+            const result = validateUserInfo(user.userInfo);
+            if (!result.success) {
+                console.log('Error en el objeto de usuario ', result.error);
+                return res.status(400).json({error: JSON.parse(result.error.message)});
+            }                        
             
             // Set the refresh token in a cookie with a secure and httpOnly flag - NEW!
             res.cookie('refreshToken', tokens.refresh_token, {
@@ -43,7 +51,8 @@ gmailRouter.post('/', async (req, res) => {
                 httpOnly: true, // Cookie cannot be accessed by JavaScript
                 // maxAge: tokens.expires_in * 1000, // Set the expiration time based on token validity
             });
-        
+            
+            // save the user in the database user and refresh token
             res.json(user);     
         
         }
@@ -52,7 +61,6 @@ gmailRouter.post('/', async (req, res) => {
         res.status(500).send(err.message)
         }            
 });
-
 
 gmailRouter.post('/refresh-token', async (req, res) => {   
     
