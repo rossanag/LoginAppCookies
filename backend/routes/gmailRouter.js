@@ -34,21 +34,21 @@ gmailRouter.post('/', async (req, res) => {
         oAuth2Client.setCredentials(tokens);
         
         try {
-        const user = await getUser(tokens);
-        console.log('\nObjeto de Usuario ', user)
+            const user = await getUser(tokens);
+            console.log('\nObjeto de Usuario ', user)
+            
+            // Set the refresh token in a cookie with a secure and httpOnly flag - NEW!
+            res.cookie('refreshToken', tokens.refresh_token, {
+                secure: false, // true - Requires HTTPS
+                httpOnly: true, // Cookie cannot be accessed by JavaScript
+                // maxAge: tokens.expires_in * 1000, // Set the expiration time based on token validity
+            });
         
-         // Set the refresh token in a cookie with a secure and httpOnly flag - NEW!
-         res.cookie('refreshToken', tokens.refresh_token, {
-            secure: false, // true - Requires HTTPS
-            httpOnly: true, // Cookie cannot be accessed by JavaScript
-            // maxAge: tokens.expires_in * 1000, // Set the expiration time based on token validity
-        });
-    
-        res.json(user);     
+            res.json(user);     
         
         }
-        catch(err) {
-        console.log('Error al enviar usuario', err)
+            catch(err) {
+            console.log('Error al enviar usuario', err)
         res.status(500).send(err.message)
         }            
 });

@@ -8,7 +8,7 @@ import express from 'express';
 dotenv.config();
 
 import corsOptions from './config/corsOptions.js';
-//import createGmailRoutes from './routes/gmailRoutes.js';
+import connectDB from './config/dbConn.js';
 import createCommonRoutes from './routes/common.js';
 import credentials from './middleware/credentials.js';
 import gmailRouter from './routes/gmailRouter.js';
@@ -24,5 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 //createGmailRoutes(app)
 app.use('/oauth/google', gmailRouter)
 createCommonRoutes(app);
+
+connectDB();
 
 app.listen(process.env.PORT, () => console.log(`Server is running at port`, process.env.PORT));
