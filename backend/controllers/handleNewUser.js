@@ -1,8 +1,9 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-import { generateHash } from "../Utils/utils";
-import User from "../model/User";
+import {generateHash}  from "../Utils/utils.js";
 
+
+import User from '../model/User.js';    
 
 const handleNewUser = async (req, res, user) => {
     
@@ -63,29 +64,16 @@ const handleNewUser = async (req, res, user) => {
 
             const newRegularUser = new RegularUser(regularUserData);
             newRegularUser.save((err, savedRegularUser) => {
-            if (err) {
-                throw new Error('Error creating the user:', err);
-            } else {
-                console.log('Regular user created:', savedRegularUser);
-            }
-});
-
-            //////////////////////////////////7
-            userDB = await User.create({
-                "name": user.userInfo.name,
-                "email": user.userInfo.email,
-                "password": hashedPasword,
-                "authMode": 'local',
-                "refreshToken": hashRefreshToken
+                if (err) {
+                    throw new Error('Error creating the user:', err);
+                } else {
+                    console.log('Regular user created:', savedRegularUser);
+                }
             });
-        }
-            
-        console.log('Usuario creado ', user)
-        res.status(201).json(userDB);
-
+        }        
     } catch (error) {
         console.log('Error al crear usuario ', error)
-        res.status(500).json({ error: error.message });
+        throw new Error('Error creating the user:', error);
     }
 }
 

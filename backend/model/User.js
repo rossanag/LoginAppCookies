@@ -56,7 +56,7 @@ User.discriminator('GmailUser', gmailUserSchema, discriminatorKey, { _id: true }
 
 
 // Compare the given password with the hashed password in the database
-RegularUserSchema.methods.comparePassword = async function (password) {
+regularUserSchema.methods.comparePassword = async function (password) {
     return bcrypt.compare(password, this.password);
 };
 
