@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 
 const Schema = mongoose.Schema;
 
+//Base for all users
 const UserSchema = new Schema({
     name: {
         type: String,
@@ -15,27 +17,48 @@ const UserSchema = new Schema({
         unique: true,
         match: [/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/, 'Invalid email address']
     },    
-    picture: {
-        type: String,
-        required: false      
-    },    
-    authMode: {
-        type: String,
-        enum: ['google', 'local'],
-        default: 'local'
-    },
+    
     refreshToken: {
         type: String,        
         required: true
     },    
 });
 
+// Schema for regular users
+const regularUserSchema = new mongoose.Schema({
+  password: { 
+    type: String, 
+    required: true },  
+});
+
+// Schema for Gmail users
+const gmailUserSchema = new mongoose.Schema({
+    picture: {
+        type: String,
+        required: [true, 'Picture is required'],
+        validate: {
+            validator: function (v) {
+                return /^https?:\/\/\S+$/.test(v);
+            },
+            message: props => `${props.value} is not a valid picture URL!`
+        }
+    }
+  // Fields specific to Gmail users
+});
+
+// Discriminator key for distinguishing between user types
+const discriminatorKey = 'userType';
+
+// Define the discriminators for different user types
+const User = mongoose.model('User', UserSchema);
+User.discriminator('RegularUser', regularUserSchema, discriminatorKey, { _id: true });
+User.discriminator('GmailUser', gmailUserSchema, discriminatorKey, { _id: true });
+
+
 // Compare the given password with the hashed password in the database
-UserSchema.methods.comparePassword = async function (password) {
+RegularUserSchema.methods.comparePassword = async function (password) {
     return bcrypt.compare(password, this.password);
 };
-
-const User = mongoose.model('User', UserSchema);
 
 export default User;
 

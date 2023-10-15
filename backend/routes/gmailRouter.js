@@ -3,7 +3,7 @@ import { UserRefreshClient } from 'google-auth-library';
 
 import { getUser, setGmailAuth } from '../controllers/gmailControllers.js';
 import { validateUserInfo } from '../schemas/user.js';
-
+import handleNewUser from '../controllers/handleNewUser.js';
 
 const gmailRouter = Router();
 
@@ -34,8 +34,9 @@ gmailRouter.post('/', async (req, res) => {
         const { tokens } = await oAuth2Client.getToken(req.body.code); // exchange code for tokens
         oAuth2Client.setCredentials(tokens);
         
+        let user = undefined
         try {
-            const user = await getUser(tokens);
+            user = await getUser(tokens);
             console.log('\nObjeto de Usuario ', user)
 
             
@@ -53,12 +54,18 @@ gmailRouter.post('/', async (req, res) => {
             });
             
             // save the user in the database user and refresh token
-            res.json(user);     
-        
-        }
-            catch(err) {
+            try {
+                handleNewUser(req, res, user);
+                return res.status(201).json(user);     
+            }
+            catch (err) {
+                console.log('Error al guardar usuario ', err)
+                return res.status(500).json({error: err.message});
+            }
+        }                        
+        catch(err) {
             console.log('Error al enviar usuario', err)
-        res.status(500).send(err.message)
+            res.status(500).send(err.message)
         }            
 });
 

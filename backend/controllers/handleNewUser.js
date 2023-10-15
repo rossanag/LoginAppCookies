@@ -1,6 +1,7 @@
-import User from "../model/User";
-import { userSchema } from "../schemas/user";
+import mongoose from "mongoose";
+
 import { generateHash } from "../Utils/utils";
+import User from "../model/User";
 
 
 const handleNewUser = async (req, res, user) => {
@@ -22,15 +23,24 @@ const handleNewUser = async (req, res, user) => {
             return res.status(500).json({ error: 'Please, log again' });
         }
 
-        let userDB = undefined;
         if (user.userInfo.authMode === 'google') {
-            userDB = await User.create({     
+            const gmailUserData = {     
                 "name": user.userInfo.name,       
                 "email": user.userInfo.email,
-                "picture": user.userInfo.picture,
-                "authMode": 'google',
+                "picture": user.userInfo.picture,             
+                "authMode": "google",
                 "refreshToken": hashRefreshToken
-            });            
+            };            
+
+            const GmailUser = mongoose.model('GmailUser');
+            const newGmailUser = new GmailUser(gmailUserData);
+            newGmailUser.save((err, savedGmailUser) => {
+                if (err) {
+                    throw new Error('Error creating Gmail user:', err);
+                } else {
+                    console.log('Gmail user created:', savedGmailUser);
+                }
+                });            
         } else {
 
             let hashedPasword = undefined;
@@ -38,8 +48,29 @@ const handleNewUser = async (req, res, user) => {
                 hashedPasword = await generateHash(user.userInfo.password);
             }
             catch (err) {
-                return res.status(500).json({ error: 'Please, log again' });
+                throw new Error('Error creating the user:', err);
+            }            
+            const RegularUser = mongoose.model('RegularUser');
+            const regularUserData = {
+                "name": user.userInfo.name,       
+                "email": user.userInfo.email,
+                "password": userInfo.password,
+                "picture": user.userInfo.picture,             
+                "authMode": "local",
+                "refreshToken": hashRefreshToken
+              };
+              
+
+            const newRegularUser = new RegularUser(regularUserData);
+            newRegularUser.save((err, savedRegularUser) => {
+            if (err) {
+                throw new Error('Error creating the user:', err);
+            } else {
+                console.log('Regular user created:', savedRegularUser);
             }
+});
+
+            //////////////////////////////////7
             userDB = await User.create({
                 "name": user.userInfo.name,
                 "email": user.userInfo.email,
@@ -48,9 +79,7 @@ const handleNewUser = async (req, res, user) => {
                 "refreshToken": hashRefreshToken
             });
         }
-
             
-
         console.log('Usuario creado ', user)
         res.status(201).json(userDB);
 
