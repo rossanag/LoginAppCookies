@@ -64,7 +64,7 @@ gmailRouter.post('/', async (req, res) => {
                 console.log('Error al guardar usuario ', err)
                 if (err.message.includes('User already exists')) {
                     //return res.status(409).json({ error: 'User already exists' });
-                    console.log("Usuario duplicado ", user)
+                    console.log("For log puroposes - Usuario duplicado ", user)
                     return res.json(user);
                 }
                 return res.status(500).json({ error: 'Error creating the user' });
@@ -77,8 +77,7 @@ gmailRouter.post('/', async (req, res) => {
 });
 
 gmailRouter.post('/refresh-token', async (req, res) => {   
-    
-        
+            
         const user = new UserRefreshClient(
             process.env.GOOGLE_CLIENT_ID,
             process.env.GOOGLE_CLIENT_SECRET,
