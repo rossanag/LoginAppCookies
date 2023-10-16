@@ -6,8 +6,7 @@ import {generateHash}  from "../Utils/utils.js";
 import User from '../model/User.js';    
 
 const handleNewUser = async (req, res, user) => {
-    
-    //console.log('Datos del usuario ', req.body)
+        
     try {
 
         const duplicate = await User.findOne({ email: user.userInfo.email });
@@ -18,10 +17,11 @@ const handleNewUser = async (req, res, user) => {
 
         let hashRefreshToken = undefined;
         try {
-            hashRefreshToken = await generateHash(user.userInfo.refreshToken);
+            hashRefreshToken = await generateHash(user.userTokens.refresh_token);
         }
         catch (err) {
             return res.status(500).json({ error: 'Please, log again' });
+            throw new Error('Error creating the hash:', err);
         }
 
         if (user.userInfo.authMode === 'google') {
@@ -35,13 +35,16 @@ const handleNewUser = async (req, res, user) => {
 
             const GmailUser = mongoose.model('GmailUser');
             const newGmailUser = new GmailUser(gmailUserData);
-            newGmailUser.save((err, savedGmailUser) => {
-                if (err) {
-                    throw new Error('Error creating Gmail user:', err);
-                } else {
-                    console.log('Gmail user created:', savedGmailUser);
-                }
-                });            
+            console.log('gmailUserData ', gmailUserData);
+            console.log('Guardando usuario en la base de datos al user ', newGmailUser)
+
+            try {
+                const savedGmailUser = await newGmailUser.save({ writeConcern: { w: 'majority' } });                
+                console.log('Gmail user created:', savedGmailUser);
+            } catch (error) {
+                console.error('Error creating Gmail user:', error);
+                throw new Error('Error creating the user:', error);
+            }                          
         } else {
 
             let hashedPasword = undefined;

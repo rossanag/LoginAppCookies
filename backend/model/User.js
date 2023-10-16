@@ -22,6 +22,10 @@ const UserSchema = new Schema({
         type: String,        
         required: true
     },    
+    authMode: {
+        type: String,
+        required: true
+    }
 });
 
 // Schema for regular users
@@ -50,7 +54,7 @@ const gmailUserSchema = new mongoose.Schema({
 const discriminatorKey = 'userType';
 
 // Define the discriminators for different user types
-const User = mongoose.model('User', UserSchema);
+const User = mongoose.model('User', UserSchema, 'Users');
 User.discriminator('RegularUser', regularUserSchema, discriminatorKey, { _id: true });
 User.discriminator('GmailUser', gmailUserSchema, discriminatorKey, { _id: true });
 

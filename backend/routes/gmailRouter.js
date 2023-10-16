@@ -55,6 +55,7 @@ gmailRouter.post('/', async (req, res) => {
             
             // save the user in the database user and refresh token
             try {
+                console.log('Guardando usuario en la base de datos al user ', user)
                 handleNewUser(req, res, user);
                 return res.status(201).json(user);     
             }
@@ -64,8 +65,8 @@ gmailRouter.post('/', async (req, res) => {
             }
         }                        
         catch(err) {
-            console.log('Error al enviar usuario', err)
-            res.status(500).send(err.message)
+            console.log('Error when logging', err.response.data.error.message)
+            res.status(500).send("Please, log again");
         }            
 });
 

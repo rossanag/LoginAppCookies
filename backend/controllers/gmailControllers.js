@@ -137,7 +137,7 @@ export const setGmailAuth = () => {
     catch(err) { 
         console.log(err)         
         // instead of err.message we use a more UX friendly approach  
-        res.status(500).send("Please, try again later")
+        throw new Error(err.response.data.error.message)
         
     };
     } 
