@@ -34,10 +34,6 @@ Operative System: Ubuntu 22.04 LTS
 - **backend**  : the backend code folder. To run the server, get into this carpet and type: `npm start`
 - **frontend** : the frontend code folder. Get into this folder and type to launch the webapp: `npm run dev`
 
-**Note :**  When loging with Google OAuth and error appears:  
-> Cross-Origin-Opener-Policy policy would block the window.closed call error while using google auth
-It [happens on Chrome](https://github.com/vercel/next.js/discussions/51135), Brave, but not in Firefox.
-
 ### Libraries/plugins added to this project
 
 #### Frontend
@@ -55,3 +51,21 @@ It [happens on Chrome](https://github.com/vercel/next.js/discussions/51135), Bra
 - [Express](https://expressjs.com)
 - [Cors](https://expressjs.com/en/resources/middleware/cors.html)
 - [Google Auth Library](https://www.npmjs.com/package/google-auth-library)
+
+#### Some notes
+
+**Browsers messages.**  When loging with Google OAuth and error appears:  
+> Cross-Origin-Opener-Policy policy would block the window.closed call error while using google auth
+It [happens on Chrome](https://github.com/vercel/next.js/discussions/51135) and Brave, but not if you use Firefox.
+
+**Store tokens -** I wanted to handle the security issues linked to the tokens storage like XSS attacks, the closer as I could to a more proffesional solution. According some readings I store the *refresh token* in cookies, sending them with the `http only` and `secure` attributes. The *access token* was store on the memory application in the client side, since its span life is sort, it's barely a risk.
+I read some articles regarding this topic:
+- [oauth token storage](https://fusionauth.io/articles/oauth/oauth-token-storage)
+- [authentication guidance for SPA](https://authguidance.com/spa-back-end-for-front-end/)
+- [Best practices for refresing tokens](https://stateful.com/blog/oauth-refresh-token-best-practices)
+
+There's a lot to improve about this topic, but what I wanted the most to get closer to a best practices, was not to use the localstorage.
+
+
+#### Future Improvements
+- Morgan, as a logger of the server activity, now it was handled with console.log()
