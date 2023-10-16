@@ -27,6 +27,7 @@ gmailRouter.get('/oauth2callback', async (req, res) => {
     .redirect(301, process.env.URL_ORIGIN);
 });
 
+
 gmailRouter.post('/', async (req, res) => {    
                 
         const oAuth2Client = setGmailAuth();
@@ -56,17 +57,22 @@ gmailRouter.post('/', async (req, res) => {
             // save the user in the database user and refresh token
             try {
                 console.log('Guardando usuario en la base de datos al user ', user)
-                handleNewUser(req, res, user);
-                return res.status(201).json(user);     
+                await handleNewUser(req, res, user);                
+                res.status(201).json(user);     
             }
             catch (err) {
                 console.log('Error al guardar usuario ', err)
-                return res.status(500).json({error: err.message});
+                if (err.message.includes('User already exists')) {
+                    //return res.status(409).json({ error: 'User already exists' });
+                    console.log("Usuario duplicado ", user)
+                    return res.json(user);
+                }
+                return res.status(500).json({ error: 'Error creating the user' });
             }
         }                        
         catch(err) {
             console.log('Error when logging', err.response.data.error.message)
-            res.status(500).send("Please, log again");
+            return res.status(500).send("Please, log again");
         }            
 });
 
