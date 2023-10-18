@@ -54,11 +54,13 @@ Operative System: Ubuntu 22.04 LTS
 
 #### Some notes
 
-**Browsers messages.**  When loging with Google OAuth and error appears:  
+**Browsers messages**
+When loging with Google OAuth and error appears:  
 > Cross-Origin-Opener-Policy policy would block the window.closed call error while using google auth
 It [happens on Chrome](https://github.com/vercel/next.js/discussions/51135) and Brave, but not if you use Firefox.
 
-**Store tokens -** I wanted to handle the security issues linked to the tokens storage like XSS attacks, the closer as I could to a more proffesional solution. According some readings I store the *refresh token* in cookies, sending them with the `http only` and `secure` attributes. The *access token* was store on the memory application in the client side, since its span life is sort, it's barely a risk.
+**Tokes storage**
+I wanted to handle the security issues linked to the tokens storage like [XSS](https://developer.mozilla.org/es/docs/Glossary/Cross-site_scripting) attacks, the closer as I could to a more proffesional solution. According to some readings I store the *refresh token* in cookies, sending them with the `http only` and `secure` attributes. The *access token* was store on the memory application in the client side, since its span life is sort so it's very remotely a risk.
 I read some articles regarding this topic:
 - [oauth token storage](https://fusionauth.io/articles/oauth/oauth-token-storage)
 - [authentication guidance for SPA](https://authguidance.com/spa-back-end-for-front-end/)
