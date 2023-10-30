@@ -1,6 +1,6 @@
 import axios , {AxiosError} from 'axios';
 
-import { User } from '../types';
+import { User, UserTokens } from '../types';
 
 export const apiGoogle = axios.create({
 	baseURL:  import.meta.env.VITE_SERVER_ENDPOINT,
@@ -65,7 +65,7 @@ apiGoogle.interceptors.response.use (
 
 	});
 	
-
+/* 
 apiGoogle.interceptors.request.use((request) => {	
 	const token = localStorage.getItem('token');
 	
@@ -78,7 +78,21 @@ apiGoogle.interceptors.request.use((request) => {
 (error) => {
 	Promise.reject(error);
 }
-); 
+);  */
 
-
+apiGoogle.interceptors.request.use(
+	(config) => {
+		
+		const token:UserTokens = JSON.parse(localStorage.getItem('tokens') as string) as UserTokens;
+		if (token) {
+			console.log('token in interceptor', token.access_token);
+			config.headers['Authorization'] = `Bearer ${token.access_token}`;
+		}
+		return config;
+	},
+	(error) => {
+		return Promise.reject(error);
+	}
+);
+  
 

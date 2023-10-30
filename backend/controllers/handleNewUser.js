@@ -5,22 +5,21 @@ import {generateHash}  from "../Utils/utils.js";
 
 import User from '../model/User.js';    
 
-const handleNewUser = async (req, res, user) => {
+const handleNewUser = async (user) => {
         
     console.log('user received to save', user)
     const duplicate = await User.findOne({ email: user.userInfo.email });
     
     if (duplicate) {
         //console.log('Usuario duplicado ', duplicate);                
-        throw new Error('User already exists - Error 409');                         
+        throw new Error('User already exists');                         
     }     
 
     let hashRefreshToken = undefined;
     try {
         hashRefreshToken = await generateHash(user.userTokens.refresh_token);
     }
-    catch (err) {
-        //return res.status(500).json({ error: 'Please, log again' });
+    catch (err) {        
          throw new Error('Error creating the hash:', err);
      
     }

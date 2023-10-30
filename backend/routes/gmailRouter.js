@@ -1,12 +1,11 @@
 import {Router} from 'express';
-import { UserRefreshClient } from 'google-auth-library';
 
-import { getUser, setGmailAuth } from '../controllers/gmailControllers.js';
-import { validateUserInfo } from '../schemas/user.js';
 import handleNewUser from '../controllers/handleNewUser.js';
+import { getUser, setGmailAuth } from '../Utils/login.js';
+import { validateUserInfo } from '../schemas/user.js';
+
 
 const gmailRouter = Router();
-
 gmailRouter.get('/oauth2callback', async (req, res) => {    
         
     const oAuth2Client = setGmailAuth();
@@ -34,37 +33,44 @@ gmailRouter.post('/', async (req, res) => {
 
         const { tokens } = await oAuth2Client.getToken(req.body.code); // exchange code for tokens
         oAuth2Client.setCredentials(tokens);
+
+        console.log('tokens EN SERVER ', tokens)
+        const tokenInfo = await oAuth2Client.getTokenInfo(
+            oAuth2Client.credentials.access_token
+        );
         
         let user = undefined
         try {
             user = await getUser(tokens);
-            console.log('\nObjeto de Usuario ', user)
+            console.log('\nObjeto de Usuario nuevo ', user)
 
             
-            const result = validateUserInfo(user.userInfo);
+            const result = validateUserInfo(user.userInfo); //Before saving in DB
             if (!result.success) {
-                console.log('Error en el objeto de usuario ', result.error);
+                console.log('Error: when validating user schema object ', result.error);
                 return res.status(400).json({error: JSON.parse(result.error.message)});
-            }                        
+            } 
+            
             
             // Set the refresh token in a cookie with a secure and httpOnly flag - NEW!
             res.cookie('refreshToken', tokens.refresh_token, {
-                secure: false, // true - Requires HTTPS
+                secure:  process.env.NODE_ENV === 'production', // true - Requires HTTPS
                 httpOnly: true, // Cookie cannot be accessed by JavaScript
-                // maxAge: tokens.expires_in * 1000, // Set the expiration time based on token validity
+                sameSite: 'None',
+                maxAge: tokenInfo.expiry_date * 1000,
             });
-            
+
             // save the user in the database user and refresh token
             try {
-                console.log('Guardando usuario en la base de datos al user ', user)
-                await handleNewUser(req, res, user);                
-                res.status(201).json(user);     
+                console.log('User created ', user)
+                await handleNewUser(user);                              
+                res.status(201).json(user);                   
             }
             catch (err) {
-                console.log('Error al guardar usuario ', err)
+                console.log('An issue or an error was thrwon when attemping to save the user ', err)
                 if (err.message.includes('User already exists')) {
                     //return res.status(409).json({ error: 'User already exists' });
-                    console.log("For log puroposes - Usuario duplicado ", user)
+                    console.log("For log puroposes - Duplicated user ", user)
                     return res.json(user);
                 }
                 return res.status(500).json({ error: 'Error creating the user' });
@@ -78,27 +84,33 @@ gmailRouter.post('/', async (req, res) => {
 
 gmailRouter.post('/refresh-token', async (req, res) => {   
             
-        const user = new UserRefreshClient(
-            process.env.GOOGLE_CLIENT_ID,
-            process.env.GOOGLE_CLIENT_SECRET,
-            req.body.refreshToken,
-        );
-        // check if it exists in our database
-        // if exists, then check if it is expired, if not exist send 403.  
-        res.cookie('refreshToken', tokens.refresh_token, {
-            secure: false, // true - Requires HTTPS
-            httpOnly: true, // Cookie cannot be accessed by JavaScript
-            // maxAge: tokens.expires_in * 1000, // Set the expiration time based on token validity
-        });
+        const accessToken = req.headers.authorization.split(' ')[1];        
 
-        const { credentials } = await user.refreshAccessToken(); // otain new tokens
+        const {credentials, cookieOptions } = await getRefreshConfig(accessToken, req.body.refreshToken);
+                
+        res.cookie('refreshToken', req.body.refreshToken, cookieOptions);
         res.json(credentials);
+
  })    
 
- gmailRouter.post('/logout', async (req, res) => {    
-        console.log('Logout de Gmail')
-        res.clearCookie('refreshToken');
-        res.send('Logged out - Google');
-});
+ gmailRouter.post('/logout', async (req, res) => {
+    console.log('Estoy en logout - Server')
+    if (!req.isUnauthorized) {
+      console.log('Unauthorized')  
+      return res.status(401).send('Unauthorized');
+    }
 
+    if (req.clearCookie) {
+      res.clearCookie('refreshToken');
+      console.log('Logout de Gmail')            
+      return res.send('Logged out - Google');
+    }
+    
+    if (req.isForbidden) {
+        console.log('Forbidden')
+      return res.status(403).send('Forbidden');
+    }
+    
+});
+  
 export default gmailRouter;

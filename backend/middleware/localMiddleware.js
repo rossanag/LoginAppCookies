@@ -12,8 +12,25 @@ export const verifyJWT = (req, res, next) => {
         (err, decoded) => {
             if (err) return res.sendStatus(403); //invalid token
             req.user = decoded.UserInfo.username;
-            req.roles = decoded.UserInfo.roles;
+            //req.roles = decoded.UserInfo.roles;
             next();
         }
     );
 }
+
+export const checkAuth = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ message: 'Access denied.' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, secretKey);
+        req.user = decoded;
+        next();
+    } catch (err) {
+        return res.status(403).json({ message: 'Expired session.' });
+    }
+};

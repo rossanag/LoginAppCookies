@@ -1,30 +1,5 @@
 import axios from 'axios'
-import { OAuth2Client} from 'google-auth-library';
-
-
-export const setGmailAuth = () => {
-    const oAuth2Client = new OAuth2Client(
-        process.env.GOOGLE_CLIENT_ID,
-        process.env.GOOGLE_CLIENT_SECRET,
-        'postmessage',  
-      ); 
-      
-      oAuth2Client.on('tokens', (tokens) => {
-        //save refresh_token
-        if (tokens.refresh_token) {
-          console.log('refresh token ', tokens.refresh_token);
-        }
-        console.log('access token ', tokens.access_token);
-      });
-      
-      oAuth2Client.setCredentials({
-        refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
-        forceRefreshOnFailure: true
-      });
-    
-      return  oAuth2Client;
-}
-
+import fetch from 'node-fetch';
   /* const User = require('../model/User');
   const bcrypt = require('bcrypt');
   const jwt = require('jsonwebtoken');
@@ -109,40 +84,39 @@ export const setGmailAuth = () => {
        
     let user = {}   
     if (tokens.access_token) {
-    try {
+        try {
 
-        let resp = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokens.access_token}`, {          
-            headers: {
-                Authorization: `Bearer ${tokens.access_token}`,
-                Accept: 'application/json',               
+            let resp = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokens.access_token}`, {          
+                headers: {
+                    Authorization: `Bearer ${tokens.access_token}`,
+                    Accept: 'application/json',               
+                }
+            })                         
+            console.log('resp.data ', resp.data)
+            
+            const userInfo = {
+                name: resp.data.name,
+                email: resp.data.email,
+                picture: resp.data.picture,
+                authMode: 'google'         
             }
-        })                         
-        console.log('resp.data ', resp.data)
         
-        const userInfo = {
-            name: resp.data.name,
-            email: resp.data.email,
-            picture: resp.data.picture,
-            authMode: 'google'         
-        }
-    
-        user = {
-            userInfo,
-            userTokens
-        }           
-        // if the user exists, if it's not already in the database, save it
-        // if not exists, send the message to the client
-        console.log('user in server ', user);                  
-    }    
-    catch(err) { 
-        console.log(err)         
-        // instead of err.message we use a more UX friendly approach  
-        throw new Error(err.response.data.error.message)
-        
-    };
+            user = {
+                userInfo,
+                userTokens
+            }           
+            // if the user exists, if it's not already in the database, save it
+            // if not exists, send the message to the client
+            console.log('user in server ', user);                  
+        }    
+        catch(err) { 
+            console.log(err)         
+            // instead of err.message we use a more UX friendly approach  
+            throw new Error(err.response.data.error.message)
+            
+        };
     } 
 
     return user;
 }
 
-  

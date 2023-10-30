@@ -12,5 +12,3 @@ export const generateHash = async (item) => {
         throw error;
   }
 };
-
-

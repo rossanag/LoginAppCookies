@@ -6,7 +6,7 @@ import { CodeResponse, useGoogleLogin, GoogleOAuthProvider  } from '@react-oauth
 import { apiGoogle }  from '../api/apiAxios';
 import GoogleButton from './GoogleButton';
 import { useLocalStorage } from '../hooks';
-import {User, UserData} from '../types';
+import {User, UserData, UserTokens} from '../types';
 
 
 
@@ -14,13 +14,14 @@ const Login = () => {
 	
 	// const [user, setUser] = useState<User | null>(null);	
 	const [user, setUser] = useLocalStorage<UserData | null>('user', null);	
+	const [tokens, setTokens] = useLocalStorage<UserTokens | null>('tokens', null);	
 	const [, setCodeResponse] = useState<CodeResponse | null >();		
 	const [error, setError] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(false);
 
 	const navigate = useNavigate();
 
-	const getUser = async(token: CodeResponse): Promise<UserData> => {		
+	const getUser = async(token: CodeResponse): Promise<User> => {		
 		const controller = new AbortController();
 
 		try {			
@@ -29,17 +30,20 @@ const Login = () => {
 			const data = await apiGoogle.post<User>(import.meta.env.VITE_GOOGLE_OAUTH_ENDPOINT as string, token, { signal: controller.signal });			
 			const user = data.data.userInfo;
 			const userTokens = data.data.userTokens;
+			console.log('user tokens en getUser ', userTokens);
 			//ToDo: save tokens in local storage or redux
+			
 			setError(false);			
 
 			console.log('user en getUser ', data.data);
 			console.log('userData en getUser ', user);
-			console.log('tokens en getUser ', userTokens);
+			console.log('access_token tokens en getUser ', userTokens.access_token);
 
 			//axios.defaults.headers.common['Authorization'] = 'Bearer ' + userTokens['access_token'];
 			// after any request we have the user authenticated with this sentences
 
-			return user;
+			return data.data;
+
 		} catch (error) {
 			setError(true);		
 			if (axios.isCancel(error)) {
@@ -49,12 +53,9 @@ const Login = () => {
 				throw error.response?.data || error.message;
 			}
 		
-		}
-		finally {
-			setLoading(false);
-		}		
+		}				
 		
-		return {} as UserData;
+		return {} as User;
 		
 	};
 		
@@ -62,9 +63,11 @@ const Login = () => {
 	const googleLogin = useGoogleLogin({				
 		onSuccess: async (code ) => {				
 			try {
-				const userInfo = (await getUser(code ));								
+				const {userInfo, userTokens} = (await getUser(code ));								
+				
 				setCodeResponse(code);			
 				setUser(userInfo);	
+				setTokens(userTokens);
 				console.log('user en googleLogin ', userInfo);			
 			}
 			catch (error) {
@@ -79,8 +82,9 @@ const Login = () => {
 		
 		console.log('user en useEffect ', user);
 		if (user) {		
-			console.log('user en useEffect dentro del if', user);					
-			setLoading(false);				
+			console.log('user en useEffect dentro del if', user);								
+			setLoading(false);			
+			console.log('user en useEffect dentro del if', tokens);	
 			navigate('home', {replace: true});									
 		}	
 		
