@@ -24,8 +24,8 @@ export const handleAuthorization = async (req, res, next) => {
         const client = getGmailAuth();
         
         req.client = client;        
-        
-        console.log("req.token en handleAuth ", req.token);
+        access_token = req.headers.authorization.split(' ')[1]; // Extract the access token from the request headers
+        console.log("req.token en handleAuth ", access_token);
 
         next();
     } catch (err) {
@@ -39,7 +39,7 @@ export const handleAuthorization = async (req, res, next) => {
 
 export const verifyGmailAccessToken = async (req, res, next) => {
         
-    verifyRefreshToken(req.body.refreshToken);
+    verifyRefreshToken(req.cookies.refreshToken);
 
     const accessToken = req.headers.authorization.split(' ')[1]; // Extract the access token from the request headers        
 
@@ -59,7 +59,7 @@ export const verifyGmailAccessToken = async (req, res, next) => {
                 // Call refreshToken function or perform appropriate actions
             try {
                  const {credentials, cookieOptions} = await refreshGmailToken(req, res);
-                 res.cookie('refreshToken', req.body.refreshToken, cookieOptions);
+                 res.cookie('refreshToken', req.cookies.refreshToken, cookieOptions);
                  res.json(credentials);                 
             }   
             catch (err) {                
@@ -89,12 +89,21 @@ const verifyRefreshToken = async (refreshToken) => {
         const data = response.data;
         console.log('Refresh token verified:', data);
         return data;
-    } catch (err) {
-        // delete the refresh token from the database
-        console.error('Error verifying refresh token:', err.message);
-        const error = new Error('Session expired. Please login again.');
-        error.statusCode = 403; 
-        handleError(error, req, res, next); 
+    } catch (err) {        
+        console.error('Error verifying refresh token:', err.message);        
+        if (err.response) {
+            // Check for specific error codes or messages indicating token expiration
+            if (err.response.status === 400 && err.response.data.error === 'invalid_grant') {
+                // delete the refresh token from the database
+                console.log('Refresh token has expired.');
+                const error = new Error('Session expired. Please login again.');
+                error.statusCode = 403;                 
+            } else {
+                const error = new Error('Unauthorized');
+                error.statusCode = 400;                     
+            }
+            handleError(error, req, res, next);                 
+        } 
     }
 };
 

@@ -85,31 +85,20 @@ gmailRouter.post('/', async (req, res) => {
 gmailRouter.post('/refresh-token', async (req, res) => {   
             
         const accessToken = req.headers.authorization.split(' ')[1];        
-
-        const {credentials, cookieOptions } = await getRefreshConfig(accessToken, req.body.refreshToken);
+        
+        const {credentials, cookieOptions } = await getRefreshConfig(accessToken, req.cookies.refreshToken);
                 
-        res.cookie('refreshToken', req.body.refreshToken, cookieOptions);
+        res.cookie('refreshToken', req.cookies.refreshToken, cookieOptions);
         res.json(credentials);
 
  })    
 
  gmailRouter.post('/logout', async (req, res) => {
     console.log('Estoy en logout - Server')
-    if (!req.isUnauthorized) {
-      console.log('Unauthorized')  
-      return res.status(401).send('Unauthorized');
-    }
-
-    if (req.clearCookie) {
-      res.clearCookie('refreshToken');
-      console.log('Logout de Gmail')            
-      return res.send('Logged out - Google');
-    }
     
-    if (req.isForbidden) {
-        console.log('Forbidden')
-      return res.status(403).send('Forbidden');
-    }
+    res.clearCookie('refreshToken');
+    console.log('Logout de Gmail')            
+    return res.send('Logged out - Google');            
     
 });
   
