@@ -1,7 +1,6 @@
 import axios from 'axios'
-import {getGmailAuth} from '../controllers/gmailControllers.js'
-import { handleError } from './errorMiddleware.js';
-import { refreshGmailToken } from '../Utils/login.js';
+import { handleError } from './error.js';
+import { getGmailAuth, refreshGmailToken } from '../Utils/login.js';
 
 export async function verifyGoogleIdToken(token) {
     try {
@@ -23,8 +22,9 @@ export const handleAuthorization = async (req, res, next) => {
         // console.log("req ", req)
         const client = getGmailAuth();
         
-        req.client = client;        
-        access_token = req.headers.authorization.split(' ')[1]; // Extract the access token from the request headers
+        req.client = client; 
+        console.log('reg.headers en handleAuth ', req.headers);       
+        const access_token = req.headers.authorization.split(' ')[1]; // Extract the access token from the request headers
         console.log("req.token en handleAuth ", access_token);
 
         next();

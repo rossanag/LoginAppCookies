@@ -1,7 +1,9 @@
 import {Router} from 'express';
 
 import handleNewUser from '../controllers/handleNewUser.js';
-import { getUser, setGmailAuth } from '../Utils/login.js';
+import { getRefreshConfig } from '../Utils/login.js';
+import { getUser } from '../controllers/gmailControllers.js';
+import { setGmailAuth } from '../Utils/login.js';
 import { validateUserInfo } from '../schemas/user.js';
 
 

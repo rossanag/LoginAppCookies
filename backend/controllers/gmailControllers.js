@@ -4,7 +4,7 @@ import fetch from 'node-fetch';
   const bcrypt = require('bcrypt');
   const jwt = require('jsonwebtoken');
    */
-  export const handleGmailLogin = async (req, res) => {
+export const handleGmailLogin = async (req, res) => {
       const cookies = req.cookies;
   
       const { user } = req.body;

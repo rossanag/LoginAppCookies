@@ -82,12 +82,15 @@ apiGoogle.interceptors.request.use((request) => {
 
 apiGoogle.interceptors.request.use(
 	(config) => {
-		
+		console.log('tokens object in interceptor ', localStorage.getItem('tokens'));
 		const token:UserTokens = JSON.parse(localStorage.getItem('tokens') as string) as UserTokens;
 		if (token) {
-			console.log('token in interceptor', token.access_token);
-			config.headers['Authorization'] = `Bearer ${token.access_token}`;
+			console.log('config ', config);
+			console.log('token in interceptor', token);
+			
+			config.headers['authorization'] = `Bearer ${token.access_token}`;
 		}
+		
 		return config;
 	},
 	(error) => {
