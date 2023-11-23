@@ -31,26 +31,19 @@ export const getUserToRefreshToken = (refreshToken) => {
 }
 
 
-export const refreshGmailToken = async (req, res) => {  
+export const refreshGmailToken = async (accessToken,refreshToken) => {  
+   
     try {
-                
-        const accessToken = req.headers.authorization.split(' ')[1];                
-        
-        try {
-            const {credentials, cookieOptions } = await getRefreshConfig(accessToken, req.cookies.refreshToken);
-            return {credentials, cookieOptions};
-        }
-        catch (err ) {
-            console.log('Error in getRefreshConfig:', err.message);
-            const error = new Error(err.message);
-            error.statusCode = 403; // Set the status code to 401 for unauthorized
-            throw error; // Throw the caught error
-        }               
-                
-    } catch (error) {
-        console.error('Error in refreshGmailToken:', error.message);
-        throw new Error(error.message)  //500        
+        const {credentials, cookieOptions } = await getRefreshConfig(accessToken, refreshToken);
+        return {credentials, cookieOptions};
     }
+    catch (err ) {
+        console.log('Error in getRefreshConfig:', err.message);
+        const error = new Error('Unauthorized');
+        error.statusCode = 403; // Set the status code to 401 for unauthorized
+        throw error; // Throw the caught error
+    }                               
+    
 };
 
 
@@ -67,9 +60,23 @@ export const refreshTokenCookie = async (maxAge) => {
 
 export const getRefreshConfig = async (access_token, refresh_token) => {
     const user = getUserToRefreshToken(refresh_token)    
+    
     const cookieOptions = refreshTokenCookie(access_token);
+    try {
     const { credentials } = await user.refreshAccessToken(); // obtain new tokens
+    } catch (err) {
+        const error = new Error();        
+        if (err.message === 'Token has been expired or revoked') {
+        // The refresh token has expired or is invalid
+            error.message = 'Unauthorized';
+            throw error;
 
+        } else {
+            // Server error
+            error.message = 'Please log in again later';
+            throw error;
+        }
+    }
     return {credentials, cookieOptions};
 }
         

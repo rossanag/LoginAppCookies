@@ -1,6 +1,6 @@
 import {Router} from 'express';
 
-import handleNewUser from '../controllers/handleNewUser.js';
+import {findUser, handleNewUser} from '../controllers/handleNewUser.js';
 import { getRefreshConfig } from '../Utils/login.js';
 import { getUser } from '../controllers/gmailControllers.js';
 import { setGmailAuth } from '../Utils/login.js';
@@ -51,6 +51,12 @@ gmailRouter.post('/loginGmail', async (req, res) => {
                 console.log('Error: when validating user schema object ', result.error);
                 return res.status(400).json({error: JSON.parse(result.error.message)});
             } 
+
+            //Check if the user exists in the database
+            const foundUser = await findUser(user.userInfo.email);
+            if (foundUser) {                
+                res.status(409).json({ error: 'User logged' });
+            }
             
             console.log("Refresh token in loginGmail ", tokens.refresh_token)
             // Set the refresh token in a cookie with a secure and httpOnly flag - NEW!                                
@@ -86,20 +92,22 @@ gmailRouter.post('/loginGmail', async (req, res) => {
 
 gmailRouter.post('/refresh-token', async (req, res) => {   
     
-
         const accessToken = req.headers.authorization.split(' ')[1];        
         
-        const {credentials, cookieOptions } = await getRefreshConfig(accessToken, req.cookies.refreshToken);
-                
-        res.cookie('refreshToken', req.cookies.refreshToken, cookieOptions);
-        res.json(credentials);
-
+        try {
+            const {credentials, cookieOptions } = await getRefreshConfig(accessToken, req.cookies.refreshToken);
+            res.cookie('refreshToken', req.cookies.refreshToken, cookieOptions);
+            res.json(credentials);
+        }
+        catch (err ) {
+            res.status(403).json({error: err.message});
+            //delete refresh token from DB
+        }                            
  })    
 
- gmailRouter.post('/logoutGmail', async (req, res) => {
-    console.log('Estoy en logout - Server')
+ gmailRouter.post('/logoutGmail', async (req, res) => {    
     console.log('Cookies en Logout: ', req.cookies)
-    res.clearCookie('refreshToken');
+    res.clearCookie('refreshToken', { httpOnly: true });
     console.log('Logout de Gmail')            
     return res.send('Logged out - Google');            
     

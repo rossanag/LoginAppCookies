@@ -5,7 +5,13 @@ import {generateHash}  from "../Utils/utils.js";
 
 import User from '../model/User.js';    
 
-const handleNewUser = async (user) => {
+export const findUser = async (email) => {
+    const user = await User.findOne({ email });
+    return user;
+}
+
+
+export const handleNewUser = async (user) => {
         
     console.log('user received to save', user)
     const duplicate = await User.findOne({ email: user.userInfo.email });
@@ -79,4 +85,3 @@ const handleNewUser = async (user) => {
     }            
 }
 
-export default handleNewUser;
