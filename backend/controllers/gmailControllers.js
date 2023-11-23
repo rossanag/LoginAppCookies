@@ -86,12 +86,13 @@ export const handleGmailLogin = async (req, res) => {
     if (tokens.access_token) {
         try {
 
-            let resp = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokens.access_token}`, {          
+            let resp = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo', {          
                 headers: {
                     Authorization: `Bearer ${tokens.access_token}`,
                     Accept: 'application/json',               
                 }
-            })                         
+            })     
+                                    
             console.log('resp.data ', resp.data)
             
             const userInfo = {

@@ -3,7 +3,7 @@ import { apiGoogle } from './apiAxios';
 
 // types of authentication to avoid ifs
 const logoutGmail =  async () => {
-	const urlLogout = import.meta.env.VITE_GOOGLE_OAUTH_ENDPOINT + '/logout'; 	
+	const urlLogout = import.meta.env.VITE_SERVER_ENDPOINT + '/protected/logoutGmail'; 	
 	console.log('urlLogout de gmail', urlLogout);
 	return await apiGoogle.post(urlLogout);	
 };

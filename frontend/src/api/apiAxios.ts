@@ -6,16 +6,16 @@ export const apiGoogle = axios.create({
 	baseURL:  import.meta.env.VITE_SERVER_ENDPOINT,
 	timeout: 6000,	
 	headers: { Accept: 'application/json' },
+	withCredentials: true,
 });
 
 export const refreshToken = async (user:User) => {
 	const controller = new AbortController();
-
 	
 	const refreshToken = user.userTokens.refresh_token;	
 	try {
 		const { data } = await axios.post(
-			'/oauth/google/refresh-token',  
+			'/protected/refresh-token',  
 			{
 				refreshToken: refreshToken,
 			},
@@ -52,7 +52,7 @@ apiGoogle.interceptors.response.use (
 				const access_token = resp.response.accessToken;
 				localStorage.setItem('token', access_token);
 
-				apiGoogle.defaults.headers.common['Authorization'] = 'Bearer ' + access_token;
+				apiGoogle.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 			
 				return apiGoogle(originalRequest);	
 			}
@@ -65,37 +65,27 @@ apiGoogle.interceptors.response.use (
 
 	});
 	
-/* 
-apiGoogle.interceptors.request.use((request) => {	
-	const token = localStorage.getItem('token');
-	
-	if (token) {
-		request.headers.common['Authorization'] = 'Bearer ' + token;		
-
-	}
-	return request;
-},
-(error) => {
-	Promise.reject(error);
-}
-);  */
-
 apiGoogle.interceptors.request.use(
 	(config) => {
-		console.log('tokens object in interceptor ', localStorage.getItem('tokens'));
-		const token:UserTokens = JSON.parse(localStorage.getItem('tokens') as string) as UserTokens;
-		if (token) {
-			console.log('config ', config);
-			console.log('token in interceptor', token);
+		try {
+			const tokensString = localStorage.getItem('tokens');
+			if (!tokensString) {
+				//throw new Error('No token found in localStorage');
+				return config;
+			}
 			
-			config.headers['authorization'] = `Bearer ${token.access_token}`;
+			const token = JSON.parse(tokensString) as UserTokens;
+			
+			if (!token.access_token) {
+				throw new Error('Token parsing failed');
+			}			
+			config.headers['Authorization'] = `Bearer ${token.access_token}`;
+		} catch (error) {
+			console.error('Error setting token:', error);
 		}
-		
 		return config;
 	},
 	(error) => {
 		return Promise.reject(error);
 	}
 );
-  
-

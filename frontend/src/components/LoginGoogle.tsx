@@ -14,7 +14,7 @@ const Login = () => {
 	
 	// const [user, setUser] = useState<User | null>(null);	
 	const [user, setUser] = useLocalStorage<UserData | null>('user', null);	
-	const [tokens, setTokens] = useLocalStorage<UserTokens | null>('tokens', null);	
+	const [, setTokens] = useLocalStorage<UserTokens | null>('tokens', null);	
 	const [, setCodeResponse] = useState<CodeResponse | null >();		
 	const [error, setError] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(false);
@@ -26,23 +26,31 @@ const Login = () => {
 
 		try {			
 			setLoading(true);
-																	
-			const data = await apiGoogle.post<User>(import.meta.env.VITE_GOOGLE_OAUTH_ENDPOINT as string, token, { signal: controller.signal });			
+
+			console.log('Va a buscar la data del usuario');			
+			const urlLogin = (import.meta.env.VITE_GOOGLE_OAUTH_ENDPOINT as string) + '/loginGmail';			
+			const data = await apiGoogle.post<User>(urlLogin, token, { signal: controller.signal });			
+			/* const data = await apiGoogle.post<User>(urlLogin, token, {
+				signal: controller.signal,
+				withCredentials: true,
+			}); */
+		
+
+			console.log('Datos recibidos en getUser ', data.data);
 			const user = data.data.userInfo;
 			const userTokens = data.data.userTokens;
 			console.log('user tokens en getUser ', userTokens);
 			//ToDo: save tokens in local storage or redux
 			
 			setError(false);			
-
-			console.log('user en getUser ', data.data);
+			
 			console.log('userData en getUser ', user);
 			console.log('access_token tokens en getUser ', userTokens.access_token);
 
 			//axios.defaults.headers.common['Authorization'] = 'Bearer ' + userTokens['access_token'];
-			// after any request we have the user authenticated with this sentences
+			
 
-			return data.data;
+			return data.data;			
 
 		} catch (error) {
 			setError(true);		
@@ -62,9 +70,10 @@ const Login = () => {
 	
 	const googleLogin = useGoogleLogin({				
 		onSuccess: async (code ) => {				
-			try {
+			try {				
 				const {userInfo, userTokens} = (await getUser(code ));								
-				
+				console.log('user en googleLogin ', userInfo);
+				console.log('userTokens en googleLogin ', userTokens);
 				setCodeResponse(code);			
 				setUser(userInfo);	
 				setTokens(userTokens);
@@ -84,14 +93,13 @@ const Login = () => {
 		if (user) {		
 			console.log('user en useEffect dentro del if', user);								
 			setLoading(false);			
-			console.log('user en useEffect dentro del if', tokens);	
+			
 			navigate('home', {replace: true});									
 		}	
 		
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	},[user?.email]); 
-		
-	
+	},[]); //user?.email
+			
 	return (
 		<>
 			<GoogleButton onClick={googleLogin}/>			

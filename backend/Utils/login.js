@@ -33,27 +33,26 @@ export const getUserToRefreshToken = (refreshToken) => {
 
 export const refreshGmailToken = async (req, res) => {  
     try {
+                
+        const accessToken = req.headers.authorization.split(' ')[1];                
         
-        // res.set('Authorization', `Bearer ${newAccessToken}`);
-
-        const accessToken = req.headers.authorization.split(' ')[1];        
-
         try {
-            const {credentials, cookieOptions } = await getRefreshConfig(accessToken, req.body.refreshToken);
+            const {credentials, cookieOptions } = await getRefreshConfig(accessToken, req.cookies.refreshToken);
             return {credentials, cookieOptions};
         }
         catch (err ) {
-            const error =  new Error(err.message)            
-            error.statusCode = 401; // Set the status code to 400
-            
-            throw Error;
+            console.log('Error in getRefreshConfig:', err.message);
+            const error = new Error(err.message);
+            error.statusCode = 403; // Set the status code to 401 for unauthorized
+            throw error; // Throw the caught error
         }               
                 
     } catch (error) {
-        console.error('Error in refreshToken:', error.message);
+        console.error('Error in refreshGmailToken:', error.message);
         throw new Error(error.message)  //500        
     }
 };
+
 
 export const refreshTokenCookie = async (maxAge) => {
     const cookieOptions = {
@@ -65,7 +64,6 @@ export const refreshTokenCookie = async (maxAge) => {
 
     return cookieOptions;
 };
-
 
 export const getRefreshConfig = async (access_token, refresh_token) => {
     const user = getUserToRefreshToken(refresh_token)    

@@ -29,7 +29,7 @@ gmailRouter.get('/oauth2callback', async (req, res) => {
 });
 
 
-gmailRouter.post('/', async (req, res) => {    
+gmailRouter.post('/loginGmail', async (req, res) => {    
                 
         const oAuth2Client = setGmailAuth();
 
@@ -40,12 +40,11 @@ gmailRouter.post('/', async (req, res) => {
         const tokenInfo = await oAuth2Client.getTokenInfo(
             oAuth2Client.credentials.access_token
         );
-        
+                
         let user = undefined
         try {
             user = await getUser(tokens);
             console.log('\nObjeto de Usuario nuevo ', user)
-
             
             const result = validateUserInfo(user.userInfo); //Before saving in DB
             if (!result.success) {
@@ -53,19 +52,20 @@ gmailRouter.post('/', async (req, res) => {
                 return res.status(400).json({error: JSON.parse(result.error.message)});
             } 
             
+            console.log("Refresh token in loginGmail ", tokens.refresh_token)
+            // Set the refresh token in a cookie with a secure and httpOnly flag - NEW!                                
             
-            // Set the refresh token in a cookie with a secure and httpOnly flag - NEW!
-            res.cookie('refreshToken', tokens.refresh_token, {
-                secure:  process.env.NODE_ENV === 'production', // true - Requires HTTPS
-                httpOnly: true, // Cookie cannot be accessed by JavaScript
-                sameSite: 'None',
-                maxAge: tokenInfo.expiry_date * 1000,
-            });
-
             // save the user in the database user and refresh token
             try {
                 console.log('User created ', user)
                 await handleNewUser(user);                              
+                res.cookie('refreshToken', tokens.refresh_token, {                         
+                    secure: true, // Cookie only sent in https
+                    httpOnly: true, // Cookie cannot be accessed by JavaScript
+                    sameSite: 'None',
+                    maxAge: tokenInfo.expiry_date * 1000,
+                });
+                
                 res.status(201).json(user);                   
             }
             catch (err) {
@@ -85,7 +85,8 @@ gmailRouter.post('/', async (req, res) => {
 });
 
 gmailRouter.post('/refresh-token', async (req, res) => {   
-            
+    
+
         const accessToken = req.headers.authorization.split(' ')[1];        
         
         const {credentials, cookieOptions } = await getRefreshConfig(accessToken, req.cookies.refreshToken);
@@ -95,9 +96,9 @@ gmailRouter.post('/refresh-token', async (req, res) => {
 
  })    
 
- gmailRouter.post('/logout', async (req, res) => {
+ gmailRouter.post('/logoutGmail', async (req, res) => {
     console.log('Estoy en logout - Server')
-    
+    console.log('Cookies en Logout: ', req.cookies)
     res.clearCookie('refreshToken');
     console.log('Logout de Gmail')            
     return res.send('Logged out - Google');            

@@ -3,6 +3,8 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import express from 'express';
+import fs from 'fs';
+import https from 'https';
 // const jwt = require("jsonwebtoken");
 
 import corsOptions from './config/corsOptions.js';
@@ -17,25 +19,33 @@ dotenv.config();
 
 const app = express();
 
+
+
+const options = {
+  key: fs.readFileSync('./certs/localhost-key.pem'),
+  cert: fs.readFileSync('./certs/localhost.pem'),
+};
+
+app.use(cookieParser());
 app.use(cors(corsOptions)); 
 app.use(credentials)
 app.use(express.json());
-app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+
 
 // Gmail authentication
 
-app.use('/oauth/google', handleAuthorization, verifyGmailAccessToken, gmailRouter);
+app.use('/oauth/google', gmailRouter);
+app.use('/protected', handleAuthorization, verifyGmailAccessToken, gmailRouter)
 
-//app.use('/oauth/google/logout', handleAuthorization, verifyGmailToken, gmailRouter);
-//app.use('/logout', handleAuthorization, verifyGmailToken)
-//app.use('/logout', gmailRouter)
-// Define specific route for logout and attach middlewares and router to it
-
-
+//Common routes
 createCommonRoutes(app);
 
-app.use(handleError)
-connectDB();
 
-app.listen(process.env.PORT, () => console.log(`Server is running at port`, process.env.PORT));
+connectDB();
+app.use(handleError)
+
+const httpsServer = https.createServer(options, app);
+httpsServer.listen(process.env.PORT, () => console.log(`Server is running at port`, process.env.PORT));
+
+//app.listen(process.env.PORT, () => console.log(`Server is running at port`, process.env.PORT));

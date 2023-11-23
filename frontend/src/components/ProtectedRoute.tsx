@@ -14,7 +14,7 @@ const ProtectedRoute = ( {children}: IProps ): JSX.Element => {
 		return <Navigate to="/" />;
 		
 	}
-	console.log('children ');
+	//console.log('children ');
 	return children ? children : <Outlet/>;		
 };
 

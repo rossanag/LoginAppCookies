@@ -1,8 +1,8 @@
 
 // Error handling middleware
 const errorMessages = {
-    400: 'Bad Request',
-    401: 'Unauthorized. Verify your credentials and try again.',
+    400: 'Bad Request. There are missing or invalid input data',
+    401: 'Unauthorized. Verify your credentials and try to login again.',
     403: 'Forbidden. Expiration time of the session.',
 };
 

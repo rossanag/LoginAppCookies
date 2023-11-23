@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { handleError } from './error.js';
 import { getGmailAuth, refreshGmailToken } from '../Utils/login.js';
 
 export async function verifyGoogleIdToken(token) {
@@ -21,28 +20,29 @@ export const handleAuthorization = async (req, res, next) => {
     try {        
         // console.log("req ", req)
         const client = getGmailAuth();
+
+        if (req.cookies){
+            console.log("Hay cookies en el request ", req.cookies);
+        } 
         
-        req.client = client; 
-        console.log('reg.headers en handleAuth ', req.headers);       
-        const access_token = req.headers.authorization.split(' ')[1]; // Extract the access token from the request headers
-        console.log("req.token en handleAuth ", access_token);
+        req.client = client;         
 
         next();
     } catch (err) {
         console.error('Error in handleAuthorization:', err.message);
         const error = new Error('Unauthorized');
         error.statusCode = 401; // Set the status code to 400        
-        handleError(error, req, res, next); // Call the handleError middleware with the error 
+        next(error)
     }
 };  
   
 
 export const verifyGmailAccessToken = async (req, res, next) => {
-        
-    verifyRefreshToken(req.cookies.refreshToken);
+    
+    //verifyRefreshToken(req.cookies.refreshToken, next);
 
     const accessToken = req.headers.authorization.split(' ')[1]; // Extract the access token from the request headers        
-
+    
     try {
         const response = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo`, {
             params: {
@@ -50,40 +50,46 @@ export const verifyGmailAccessToken = async (req, res, next) => {
             }
         });
         
-        const data = await response.json();
-        if (response.ok) {
+        const data = response.data;
+        console.log("ressponse en verifygmailtoken ", response);
+        console.log('\nAccess token verified veamos response.data :', data);
+        if (response.status === 200) {
+            console.log("response ok")
             req.tokenInfo = data; 
             
             next(); // Proceed to the next middleware
         } else {
                 // Call refreshToken function or perform appropriate actions
+            console.log("response not ok")    
             try {
                  const {credentials, cookieOptions} = await refreshGmailToken(req, res);
                  res.cookie('refreshToken', req.cookies.refreshToken, cookieOptions);
                  res.json(credentials);                 
             }   
-            catch (err) {                
+            catch (err) {    
+                console.log('Error refreshing token:', err);            
                 const error = new Error('Unauthorized');
                 error.statusCode = 400; // Set the status code to 400
-                handleError(error, req, res, next); // Call the handleError middleware with the error
+                next(error)
             }                    
         }
     }
     catch (err) {
-        console.error('Error verifying token:', error.message);
-        
+        console.log('Error verifying token:', err.message);
         const error = new Error('Internal Server Error');
         error.statusCode = 500; // Set the status code to 500
-        handleError(error, req, res, next); // Call the handleError middleware with the error
+        
+        next(error)
     }           
 };
 
-const verifyRefreshToken = async (refreshToken) => {
+const verifyRefreshToken = async (refreshToken, next) => {
     try {
+        
         const response = await axios.post('https://www.googleapis.com/oauth2/v4/token', {
             refresh_token: refreshToken,
-            client_id: env.GOOGLE_CLIENT_ID,
-            client_secret: env.GOOGLE_CLIENT_SECRET,
+            client_id: process.env.GOOGLE_CLIENT_ID,
+            client_secret: process.env.GOOGLE_CLIENT_SECRET,
             grant_type: 'refresh_token',
         });
         const data = response.data;
@@ -97,12 +103,15 @@ const verifyRefreshToken = async (refreshToken) => {
                 // delete the refresh token from the database
                 console.log('Refresh token has expired.');
                 const error = new Error('Session expired. Please login again.');
-                error.statusCode = 403;                 
+                error.statusCode = 403;                                 
+                next(error)
             } else {
+                console.log('Error verifying refresh token inner mid:', err);
                 const error = new Error('Unauthorized');
                 error.statusCode = 400;                     
+                next(error)
             }
-            handleError(error, req, res, next);                 
+            
         } 
     }
 };
