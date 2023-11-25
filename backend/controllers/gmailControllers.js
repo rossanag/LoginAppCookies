@@ -77,15 +77,12 @@ export const handleGmailLogin = async (req, res) => {
   export const getUser = async (tokens) => {
     const userTokens = {
         access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
-        //id_token: tokens.id_token,
-        // expiry_date : tokens.expiry_date
+        refresh_token: tokens.refresh_token,        
     }
        
     let user = {}   
     if (tokens.access_token) {
         try {
-
             let resp = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo', {          
                 headers: {
                     Authorization: `Bearer ${tokens.access_token}`,

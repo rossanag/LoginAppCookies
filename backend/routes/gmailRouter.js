@@ -8,6 +8,7 @@ import { validateUserInfo } from '../schemas/user.js';
 
 
 const gmailRouter = Router();
+
 gmailRouter.get('/oauth2callback', async (req, res) => {    
         
     const oAuth2Client = setGmailAuth();
@@ -100,12 +101,13 @@ gmailRouter.post('/refresh-token', async (req, res) => {
             res.json(credentials);
         }
         catch (err ) {
-            res.status(403).json({error: err.message});
             //delete refresh token from DB
+            res.clearCookie('refreshToken', { httpOnly: true });
+            res.status(401).json({error: err.message});            
         }                            
  })    
 
- gmailRouter.post('/logoutGmail', async (req, res) => {    
+gmailRouter.post('/logoutGmail', async (req, res) => {    
     console.log('Cookies en Logout: ', req.cookies)
     res.clearCookie('refreshToken', { httpOnly: true });
     console.log('Logout de Gmail')            

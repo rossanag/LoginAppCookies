@@ -14,7 +14,7 @@ const Login = () => {
 	
 	// const [user, setUser] = useState<User | null>(null);	
 	const [user, setUser] = useLocalStorage<UserData | null>('user', null);	
-	const [, setTokens] = useLocalStorage<UserTokens | null>('tokens', null);	
+	const [, setTokens] = useLocalStorage<UserTokens | null>('token', null);	
 	const [, setCodeResponse] = useState<CodeResponse | null >();		
 	const [error, setError] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(false);
@@ -30,12 +30,7 @@ const Login = () => {
 			console.log('Va a buscar la data del usuario');			
 			const urlLogin = (import.meta.env.VITE_GOOGLE_OAUTH_ENDPOINT as string) + '/loginGmail';			
 			const data = await apiGoogle.post<User>(urlLogin, token, { signal: controller.signal });			
-			/* const data = await apiGoogle.post<User>(urlLogin, token, {
-				signal: controller.signal,
-				withCredentials: true,
-			}); */
-		
-
+			
 			console.log('Datos recibidos en getUser ', data.data);
 			const user = data.data.userInfo;
 			const userTokens = data.data.userTokens;
@@ -98,7 +93,7 @@ const Login = () => {
 		}	
 		
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	},[]); //user?.email
+	},[]); 
 			
 	return (
 		<>

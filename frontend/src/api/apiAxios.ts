@@ -1,5 +1,4 @@
 import axios , {AxiosError} from 'axios';
-
 import { User, UserTokens } from '../types';
 
 export const apiGoogle = axios.create({
@@ -15,7 +14,7 @@ export const refreshToken = async (user:User) => {
 	const refreshToken = user.userTokens.refresh_token;	
 	try {
 		const { data } = await axios.post(
-			'/protected/refresh-token',  
+			'/refresh-token',  
 			{
 				refreshToken: refreshToken,
 			},
@@ -43,9 +42,14 @@ apiGoogle.interceptors.response.use (
 	
 	}, async (error) => {		
 		const user  = localStorage.getItem('user') as unknown as User;
+
+		if (!user) {
+	
+			window.location.href = `${window.location.origin}/login`;					
+		}
 			
 		const originalRequest = error.config;
-		if (error.response.status === 403 && !originalRequest._retry) {
+		if (error.response.status === 401 && !originalRequest._retry) {
 			originalRequest._retry = true;
 			try {
 				const resp = await refreshToken(user);
@@ -58,7 +62,9 @@ apiGoogle.interceptors.response.use (
 			}
 			catch (error) {
 				console.log('error ', error);
-				//Add toast to show error
+				localStorage.removeItem('user');
+				localStorage.removeItem('token');
+				window.location.href = `${window.location.origin}/login`;		
 			}	
 		}
 		return Promise.reject(error);
@@ -70,7 +76,7 @@ apiGoogle.interceptors.request.use(
 		try {
 			const tokensString = localStorage.getItem('tokens');
 			if (!tokensString) {
-				//throw new Error('No token found in localStorage');
+				throw new Error('No token found in localStorage');
 				return config;
 			}
 			

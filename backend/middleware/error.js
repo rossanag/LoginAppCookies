@@ -4,11 +4,15 @@ const errorMessages = {
     400: 'Bad Request. There are missing or invalid input data',
     401: 'Unauthorized. Verify your credentials and try to login again.',
     403: 'Forbidden. Expiration time of the session.',
+    500: 'Please, try again later.' // Internal Server Error
 };
 
 export const handleError = (err, req, res, next) => {
-    const errorMessage = errorMessages[err.statusCode] || 'Internal Server Error';
+    const errorMessage = errorMessages[err.statusCode] || 'Please, try again later.';
     console.error(errorMessage, err);
-    res.status(err.statusCode || 500).send(errorMessage);
+    if (err.status === 401) {
+        res.clearCookie('refreshToken', { httpOnly: true });
+    }
+    res.status(err.status || 500).send(errorMessage);
 };
 

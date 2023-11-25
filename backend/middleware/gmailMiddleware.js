@@ -18,28 +18,20 @@ export async function verifyGoogleIdToken(token) {
   }
 
 export const handleAuthorization = async (req, res, next) => {
-    try {        
-        // console.log("req ", req)
-        const client = getGmailAuth();
-
-        /* if (req.cookies){
-            console.log("Hay cookies en el request ", req.cookies);
-        } 
-        
- */     req.client = client;         
-
-        next();
-    } catch (err) {
-        console.error('Error in handleAuthorization:', err.message);
+   
+   if (!req.cookies){
+        console.log("No cookies in the request ");        
+            
         const error = new Error('Unauthorized');
         error.statusCode = 401; // Set the status code to 400        
         next(error)
-    }
+    } 
+        
+    req.client = getGmailAuth();    
 };  
   
 
-export const verifyGmailAccessToken = async (req, res, next) => {
-        
+export const verifyGmailAccessToken = async (req, res, next) => {        
 
     let accessToken = req.headers.authorization.split(' ')[1]; // Extract the access token from the request headers        
     
@@ -54,30 +46,19 @@ export const verifyGmailAccessToken = async (req, res, next) => {
         
         if (response.status === 200) {
             console.log("response ok")
-            req.tokenInfo = data; 
-            
-            next(); // Proceed to the next middleware
-        } else {
-                // Call refreshToken function or perform appropriate actions
-            console.log("response not ok")    
-            try {
-                 const {credentials, cookieOptions} = await refreshGmailToken(accessToken, req.cookies.refreshToken);
-                 res.cookie('refreshToken', req.cookies.refreshToken, cookieOptions);
-                 res.json(credentials);                 
-            }   
-            catch (err) {    
-                console.log('Error refreshing token:', err);            
-                const error = new Error('Unauthorized');
-                error.statusCode = 403; // Set the status code to 400
-                next(error)
-            }                    
+            req.tokenInfo = data;             
+            next(); // Proceed to the next middleware        
+        }    
+    } catch (err) { 
+        if (err.status === 401) {
+            console.log('Error refreshing token:', err);            
+            const error = new Error('Unauthorized');
+            error.statusCode = 401; 
+            next(error)                
         }
-    }
-    catch (err) {
-        console.log('Error verifying token:', err.message);
-        const error = new Error('Internal Server Error');
-        error.statusCode = 500; // Set the status code to 500
-        
-        next(error)
-    }           
+        console.log('Internal error server', err);            
+        const error = new Error('Unauthorized');
+        error.statusCode = 500; 
+        next(error)                
+    }               
 };

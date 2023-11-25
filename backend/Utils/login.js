@@ -20,7 +20,7 @@ export const setGmailAuth = () => {
     
     return  oAuth2Client;
 }
-
+dp
 export const getUserToRefreshToken = (refreshToken) => {
     const user = new UserRefreshClient(
         process.env.GOOGLE_CLIENT_ID,
@@ -46,8 +46,7 @@ export const refreshGmailToken = async (accessToken,refreshToken) => {
     
 };
 
-
-export const refreshTokenCookie = async (maxAge) => {
+export const getCookieOptions = async (maxAge) => {
     const cookieOptions = {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
@@ -61,23 +60,25 @@ export const refreshTokenCookie = async (maxAge) => {
 export const getRefreshConfig = async (access_token, refresh_token) => {
     const user = getUserToRefreshToken(refresh_token)    
     
-    const cookieOptions = refreshTokenCookie(access_token);
+    const cookieOptions = getCookieOptions(access_token);
     try {
-    const { credentials } = await user.refreshAccessToken(); // obtain new tokens
+        const { credentials } = await user.refreshAccessToken(); // obtain new tokens
+        return {credentials, cookieOptions};
     } catch (err) {
         const error = new Error();        
         if (err.message === 'Token has been expired or revoked') {
         // The refresh token has expired or is invalid
             error.message = 'Unauthorized';
+            error.statusCode = 403; // Set the status code to 403 for forbidden
             throw error;
 
         } else {
             // Server error
             error.message = 'Please log in again later';
+            error.statusCode = 500; // Set the status code to 500 for internal server error
             throw error;
         }
-    }
-    return {credentials, cookieOptions};
+    }    
 }
         
 
