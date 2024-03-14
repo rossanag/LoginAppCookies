@@ -10,5 +10,4 @@ const credentials = (req, res, next) => {
     next();
 }
 
-
 export default credentials;

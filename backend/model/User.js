@@ -20,7 +20,7 @@ const UserSchema = new Schema({
     
     refreshToken: {
         type: String,        
-        required: true
+        required: false
     },    
     authMode: {
         type: String,

@@ -12,9 +12,7 @@ import { useLocalStorage } from '../hooks';
 
 
 const LandingPage = () => {
-	
-	// const user : User = JSON.parse(localStorage.getItem('user' ) as string) ;
-
+		
 	const [user, ] = useLocalStorage<UserData | null>('user', null);	
 	
 	if (!user) console.log('No hay user en landing page');
@@ -39,12 +37,12 @@ const LandingPage = () => {
 				<Routes>											
 					<Route element={ <Dashboard /> }>
 						<Route
-							path="index.html"
+							//path="index.html"
 							element={user ? <ProtectedRoute>
 								<Home />
 							</ProtectedRoute> :<Navigate to = "/"/> } />								
 						<Route
-							path="index.html"
+							//path="index.html"
 							element={user ? <Navigate to = "/home"/> :<LoginGoogle/> } />																										
 						<Route
 							path="home"

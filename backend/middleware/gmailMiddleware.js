@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { getGmailAuth, refreshGmailToken } from '../Utils/login.js';
+import { getGmailAuth} from '../Utils/login.js';
 
 export async function verifyGoogleIdToken(token) {
     try {
@@ -18,7 +18,7 @@ export async function verifyGoogleIdToken(token) {
   }
 
 export const handleAuthorization = async (req, res, next) => {
-   
+    
    if (!req.cookies){
         console.log("No cookies in the request ");        
             
@@ -26,13 +26,15 @@ export const handleAuthorization = async (req, res, next) => {
         error.statusCode = 401; // Set the status code to 400        
         next(error)
     } 
-        
-    req.client = getGmailAuth();    
+    else {        
+        req.client = getGmailAuth();            
+        next(); // Proceed to the next middleware
+    }    
 };  
   
 
 export const verifyGmailAccessToken = async (req, res, next) => {        
-
+    
     let accessToken = req.headers.authorization.split(' ')[1]; // Extract the access token from the request headers        
     
     try {
@@ -51,7 +53,7 @@ export const verifyGmailAccessToken = async (req, res, next) => {
         }    
     } catch (err) { 
         if (err.status === 401) {
-            console.log('Error refreshing token:', err);            
+            console.log('Error with the access token:', err);            
             const error = new Error('Unauthorized');
             error.statusCode = 401; 
             next(error)                

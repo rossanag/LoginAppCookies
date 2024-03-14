@@ -1,4 +1,5 @@
 import { OAuth2Client, UserRefreshClient} from 'google-auth-library';
+import { getRefreshTokenHash } from './utils.js';
 
 export const getGmailAuth = () => {
     const oAuth2Client = new OAuth2Client(
@@ -6,7 +7,7 @@ export const getGmailAuth = () => {
         process.env.GOOGLE_CLIENT_SECRET,
         'postmessage',  
     ); 
-
+    
     return  oAuth2Client;
 }
 
@@ -20,7 +21,7 @@ export const setGmailAuth = () => {
     
     return  oAuth2Client;
 }
-dp
+
 export const getUserToRefreshToken = (refreshToken) => {
     const user = new UserRefreshClient(
         process.env.GOOGLE_CLIENT_ID,
@@ -29,7 +30,6 @@ export const getUserToRefreshToken = (refreshToken) => {
     );
     return user;
 }
-
 
 export const refreshGmailToken = async (accessToken,refreshToken) => {  
    
@@ -48,7 +48,7 @@ export const refreshGmailToken = async (accessToken,refreshToken) => {
 
 export const getCookieOptions = async (maxAge) => {
     const cookieOptions = {
-        secure: process.env.NODE_ENV === 'production',
+        secure: true, //process.env.NODE_ENV === 'production',
         httpOnly: true,
         sameSite: 'None',
         maxAge: maxAge * 1000,
@@ -57,6 +57,30 @@ export const getCookieOptions = async (maxAge) => {
     return cookieOptions;
 };
 
+export const isRefreshTokenValid = async (newRefreshToken, storedRefreshToken) => {
+        let hashedRefreshToken = undefined;
+        try {
+            hashedRefreshToken = await getRefreshTokenHash(newRefreshToken)
+        }catch (error) {
+            console.error('Error generating hash:', error);
+            throw error;
+        }
+
+        return hashedRefreshToken === storedRefreshToken;                                
+}
+
+export async function validateRefreshToken (newRefreshToken, userSavedRefreshToken) {
+    try {
+      const validRefreshToken = await isRefreshTokenValid(newRefreshToken, userSavedRefreshToken);      
+      return validRefreshToken;
+    } catch (err) {
+        console.log('Error in isRefreshTokenValid in validateRefreshToken:', err.message);
+        
+        return false; // Or throw a custom error: throw new Error("Invalid refresh token");
+    }
+  }
+
+  
 export const getRefreshConfig = async (access_token, refresh_token) => {
     const user = getUserToRefreshToken(refresh_token)    
     
@@ -79,6 +103,22 @@ export const getRefreshConfig = async (access_token, refresh_token) => {
             throw error;
         }
     }    
+}
+//https://github.com/googleapis/google-api-nodejs-client#handling-refresh-tokens
+// exchange code for tokens
+export const getUserTokenData = async (code) => {
+    
+    const oAuth2Client = getGmailAuth();
+
+    const { tokens } = await oAuth2Client.getToken(code); 
+        oAuth2Client.setCredentials(tokens);
+        
+        const tokenInfo = await oAuth2Client.getTokenInfo(
+            oAuth2Client.credentials.access_token
+        );
+    console.log('info en geUserTokenData ', tokens, tokenInfo)
+    
+    return {tokens, tokenInfo}    
 }
         
 

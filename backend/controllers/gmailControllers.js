@@ -1,4 +1,7 @@
-import axios from 'axios'
+import axios from 'axios';
+import jwt from 'jsonwebtoken';
+import { GOOGLE } from '../types/constants.js';
+
 //import fetch from 'node-fetch';
   /* const User = require('../model/User');
   const bcrypt = require('bcrypt');
@@ -10,8 +13,8 @@ export const handleGmailLogin = async (req, res) => {
       const { user } = req.body;
       if (!user) return res.status(400).json({ 'message': 'Username and password are required.' });
   
-      //const foundUser = await User.findOne({ username: user }).exec();
-      //if (!foundUser) return res.sendStatus(401); //Unauthorized 
+      const foundUser = await User.findOne({ username: user }).exec();
+      if (!foundUser) return res.sendStatus(401); //Unauthorized 
       // evaluate password 
       const match = await bcrypt.compare(pwd, foundUser.password);
       if (match) {
@@ -36,8 +39,8 @@ export const handleGmailLogin = async (req, res) => {
           // Changed to let keyword
           let newRefreshTokenArray =
               !cookies?.jwt
-                  ? foundUser.refreshToken
-                  : foundUser.refreshToken.filter(rt => rt !== cookies.jwt);
+                ? foundUser.refreshToken
+                : foundUser.refreshToken.filter(rt => rt !== cookies.jwt);
   
           if (cookies?.jwt) {
   
@@ -74,7 +77,7 @@ export const handleGmailLogin = async (req, res) => {
       }
   }
   
-  export const getUser = async (tokens) => {
+  export const getGmailUser = async (tokens) => {
     const userTokens = {
         access_token: tokens.access_token,
         refresh_token: tokens.refresh_token,        
@@ -88,15 +91,16 @@ export const handleGmailLogin = async (req, res) => {
                     Authorization: `Bearer ${tokens.access_token}`,
                     Accept: 'application/json',               
                 }
-            })     
-                                    
-            console.log('resp.data ', resp.data)
-            
+            })                                         
+            console.log('resp.data cuando obtengo usuario ', resp.data)
+        
             const userInfo = {
                 name: resp.data.name,
                 email: resp.data.email,
                 picture: resp.data.picture,
-                authMode: 'google'         
+                authMode: GOOGLE,
+                //access_token: tokens.access_token,
+                //refresh_token: tokens.refresh_token    
             }
         
             user = {

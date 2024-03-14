@@ -17,6 +17,6 @@ describe('GoogleButton', () => {
 		fireEvent.click(button);
 
 		// Expect the onClick callback to have been called once
-		expect(onClickMock).toHaveBeenCalledTimes(1);
+		expect(onClickMock).toHaveBeenCalledTimes(1); 
 	});
 });

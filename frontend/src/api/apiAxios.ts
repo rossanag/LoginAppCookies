@@ -21,8 +21,9 @@ export const refreshToken = async (user:User) => {
 		);
 		return data;
 	}    
-	catch (error) {
+	catch (error: unknown)  {
 		if (axios.isCancel(error)) {
+			
 			// request cancelled	
 			controller.abort(); 			
             
@@ -49,7 +50,9 @@ apiGoogle.interceptors.response.use (
 		}
 			
 		const originalRequest = error.config;
-		if (error.response.status === 401 && !originalRequest._retry) {
+		console.log('error en interceptor ', error);
+		
+		if (error.config.data === undefined && !originalRequest._retry) {
 			originalRequest._retry = true;
 			try {
 				const resp = await refreshToken(user);
@@ -74,10 +77,9 @@ apiGoogle.interceptors.response.use (
 apiGoogle.interceptors.request.use(
 	(config) => {
 		try {
-			const tokensString = localStorage.getItem('tokens');
+			const tokensString = localStorage.getItem('token');
 			if (!tokensString) {
-				throw new Error('No token found in localStorage');
-				return config;
+				throw new Error('No token found in localStorage');				
 			}
 			
 			const token = JSON.parse(tokensString) as UserTokens;

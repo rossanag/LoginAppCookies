@@ -12,3 +12,15 @@ export const generateHash = async (item) => {
         throw error;
   }
 };
+
+export const getRefreshTokenHash = async (refreshToken) => {
+  
+  try {
+        const hashRefreshToken = await generateHash(refreshToken);
+        return hashRefreshToken;    
+
+  } catch (error) {
+        console.error('Error generating hash:', error);
+        throw error;
+  }   
+}

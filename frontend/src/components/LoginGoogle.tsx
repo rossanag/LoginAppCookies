@@ -1,6 +1,6 @@
 import { useState, useEffect} from 'react';
-import axios , {AxiosError} from 'axios';
 import { useNavigate } from 'react-router-dom';
+import axios , {AxiosError} from 'axios';
 import { CodeResponse, useGoogleLogin, GoogleOAuthProvider  } from '@react-oauth/google';
 
 import { apiGoogle }  from '../api/apiAxios';
@@ -9,10 +9,10 @@ import { useLocalStorage } from '../hooks';
 import {User, UserData, UserTokens} from '../types';
 
 
-
+// Consent screenhttps://github.com/MomenSherif/react-oauth
+//https://www.dhiwise.com/post/react-google-oauth-the-key-to-secure-and-quick-logins
 const Login = () => {
-	
-	// const [user, setUser] = useState<User | null>(null);	
+		
 	const [user, setUser] = useLocalStorage<UserData | null>('user', null);	
 	const [, setTokens] = useLocalStorage<UserTokens | null>('token', null);	
 	const [, setCodeResponse] = useState<CodeResponse | null >();		
@@ -30,7 +30,7 @@ const Login = () => {
 			console.log('Va a buscar la data del usuario');			
 			const urlLogin = (import.meta.env.VITE_GOOGLE_OAUTH_ENDPOINT as string) + '/loginGmail';			
 			const data = await apiGoogle.post<User>(urlLogin, token, { signal: controller.signal });			
-			
+			console.log('Data recibida en getUser ', data);
 			console.log('Datos recibidos en getUser ', data.data);
 			const user = data.data.userInfo;
 			const userTokens = data.data.userTokens;
@@ -41,9 +41,7 @@ const Login = () => {
 			
 			console.log('userData en getUser ', user);
 			console.log('access_token tokens en getUser ', userTokens.access_token);
-
-			//axios.defaults.headers.common['Authorization'] = 'Bearer ' + userTokens['access_token'];
-			
+						
 
 			return data.data;			
 
@@ -58,14 +56,12 @@ const Login = () => {
 		
 		}				
 		
-		return {} as User;
-		
+		return {} as User;		
 	};
-		
-	
+			
 	const googleLogin = useGoogleLogin({				
 		onSuccess: async (code ) => {				
-			try {				
+			try {						
 				const {userInfo, userTokens} = (await getUser(code ));								
 				console.log('user en googleLogin ', userInfo);
 				console.log('userTokens en googleLogin ', userTokens);
@@ -80,6 +76,10 @@ const Login = () => {
 			
 		},
 		flow: 'auth-code',
+		select_account: false,
+		//include_granted_scopes: false
+		
+		
 	});
 
 	useEffect(() => {	 
@@ -91,9 +91,8 @@ const Login = () => {
 			
 			navigate('home', {replace: true});									
 		}	
-		
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	},[]); 
+			
+	},[navigate, user]); 
 			
 	return (
 		<>
@@ -120,4 +119,5 @@ const LoginGoogle = ():JSX.Element => {
 	);
 };	
  
+
 export default LoginGoogle;

@@ -20,7 +20,6 @@ dotenv.config();
 const app = express();
 
 
-
 const options = {
   key: fs.readFileSync('./certs/localhost-key.pem'),
   cert: fs.readFileSync('./certs/localhost.pem'),
@@ -40,7 +39,6 @@ app.use('/protected', handleAuthorization, verifyGmailAccessToken, gmailRouter)
 
 //Common routes
 createCommonRoutes(app);
-
 
 connectDB();
 app.use(handleError)

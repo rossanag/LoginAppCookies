@@ -13,10 +13,9 @@ function useLocalStorage<T>(
 
 	const clear = () => {
 		if (typeof window === 'undefined') return;
-		
+		console.log('va a limpiar el local storage');
 		window.localStorage.clear();
 	};
-
 	
 	const [value, setValue] = useState<T | undefined> (() => {
 		if (typeof window === 'undefined') return defaultValue; // server side rendering
