@@ -6,8 +6,6 @@ import { AUTH_USER } from '../api/authMode';
 
 import { googleLogout } from '@react-oauth/google';
 
-
-
 const Logout = () => {
 	const [user, ,clear] = useLocalStorage<UserData | null>('user', null);
 	const navigate = useNavigate();
@@ -20,7 +18,8 @@ const Logout = () => {
 				console.log('entró al useEffect de Logout!!!!!!!!!!!!!!!!!!!!!!!!!');
 				
 				const userAuth = user?.authMode as keyof typeof AUTH_USER;
-				await (AUTH_USER[userAuth])();
+				const resp = await (AUTH_USER[userAuth])();				
+				console.log('Respuesta de logout ', resp.data);
 				console.log('Logout ');  // toast */
 						
 				clear();
@@ -36,9 +35,9 @@ const Logout = () => {
 		
 		logout();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []); //clear, navigate, user
+	}, [clear, navigate, user]); //clear, navigate, user
 	
-	return <div />;
+	return <div/>;
 };
 
 

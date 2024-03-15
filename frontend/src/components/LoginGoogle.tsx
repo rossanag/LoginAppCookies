@@ -9,8 +9,6 @@ import { useLocalStorage } from '../hooks';
 import {User, UserData, UserTokens} from '../types';
 
 
-// Consent screenhttps://github.com/MomenSherif/react-oauth
-//https://www.dhiwise.com/post/react-google-oauth-the-key-to-secure-and-quick-logins
 const Login = () => {
 		
 	const [user, setUser] = useLocalStorage<UserData | null>('user', null);	

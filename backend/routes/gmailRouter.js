@@ -8,6 +8,11 @@ import { validateUserInfo } from '../schemas/user.js';
 import verifyUserAuth from '../controllers/verifyUser.js';
 
 
+// Consent screenhttps://github.com/MomenSherif/react-oauth
+//https://www.dhiwise.com/post/react-google-oauth-the-key-to-secure-and-quick-logins
+
+//https://mrbytebuster.medium.com/oauth-2-0-using-node-js-249d7b67257S
+// https://github.com/shaikahmadnawaz/access-refresh-tokens-nodejs/blob/master/src/controllers/user.controller.js
 const gmailRouter = Router();
 
 gmailRouter.get('/oauth2callback', async (req, res) => {    
@@ -40,7 +45,7 @@ gmailRouter.post('/loginGmail', async (req, res) => {
             console.log("tokenInfo, ", tokenInfo);       
             
             user = await getGmailUser(tokens);
-            req.email = user.userInfo.email;
+            
             console.log('\nObjeto de Usuario nuevo ', user)
     
             //Check if the user exists in the database
@@ -113,22 +118,27 @@ gmailRouter.post('/refresh-token', async (req, res) => {
         try {
             const {credentials, cookieOptions } = await getRefreshConfig(accessToken, req.cookies.refreshToken);
             res.cookie('refreshToken', req.cookies.refreshToken, cookieOptions);
+            //update refresh token in DB
             res.json(credentials);
         }
         catch (err ) {
             //delete refresh token from DB
             res.clearCookie('refreshToken', { httpOnly: true });
-            res.status(401).json({error: err.message});            
-        }                            
+            deleteRefreshToken(req.email);
+            res.status(401).json({error: 'login again'});            
+        }  
+        return;                          
  })    
 
-gmailRouter.post('/logoutGmail', async (req, res) => {    
+gmailRouter.post('/logoutGmail', (req, res) => {    
     console.log('Cookies en Logout: ', req.cookies)
-    await res.clearCookie('refreshToken', { httpOnly: true });
-    deleteRefreshToken(req.email);
+    console.log('req en logout', req.body.email)
+    res.clearCookie('refreshToken', { httpOnly: true });
+    console.log('req.mail en logout ', req.body.email)
+    deleteRefreshToken(req.body.email);
     console.log('Logout de Gmail')            
-    return res.send('Logged out - Google');            
-    
+    res.send('SERVER:Logged out - Google');            
+    return;
 });
   
 export default gmailRouter;

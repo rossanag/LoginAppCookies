@@ -78,16 +78,14 @@ apiGoogle.interceptors.request.use(
 	(config) => {
 		try {
 			const tokensString = localStorage.getItem('token');
-			if (!tokensString) {
-				throw new Error('No token found in localStorage');				
+			if (tokensString) { // Add null check
+				const token = JSON.parse(tokensString) as UserTokens;
+			
+				if (!token.access_token) {
+					throw new Error('Token parsing failed');
+				}      
+				config.headers['Authorization'] = `Bearer ${token.access_token}`;
 			}
-			
-			const token = JSON.parse(tokensString) as UserTokens;
-			
-			if (!token.access_token) {
-				throw new Error('Token parsing failed');
-			}			
-			config.headers['Authorization'] = `Bearer ${token.access_token}`;
 		} catch (error) {
 			console.error('Error setting token:', error);
 		}

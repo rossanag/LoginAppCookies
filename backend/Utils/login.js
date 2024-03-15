@@ -111,11 +111,12 @@ export const getUserTokenData = async (code) => {
     const oAuth2Client = getGmailAuth();
 
     const { tokens } = await oAuth2Client.getToken(code); 
-        oAuth2Client.setCredentials(tokens);
+    oAuth2Client.setCredentials(tokens);
+    
         
-        const tokenInfo = await oAuth2Client.getTokenInfo(
+    const tokenInfo = await oAuth2Client.getTokenInfo(
             oAuth2Client.credentials.access_token
-        );
+    );
     console.log('info en geUserTokenData ', tokens, tokenInfo)
     
     return {tokens, tokenInfo}    

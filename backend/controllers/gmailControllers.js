@@ -13,7 +13,7 @@ export const handleGmailLogin = async (req, res) => {
       const { user } = req.body;
       if (!user) return res.status(400).json({ 'message': 'Username and password are required.' });
   
-      const foundUser = await User.findOne({ username: user }).exec();
+      const foundUser = await user.findOne({ username: user }).exec();
       if (!foundUser) return res.sendStatus(401); //Unauthorized 
       // evaluate password 
       const match = await bcrypt.compare(pwd, foundUser.password);
