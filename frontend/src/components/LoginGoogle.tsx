@@ -28,7 +28,7 @@ const Login = () => {
 			console.log('Va a buscar la data del usuario');			
 			const urlLogin = (import.meta.env.VITE_GOOGLE_OAUTH_ENDPOINT as string) + '/loginGmail';			
 			const data = await apiGoogle.post<User>(urlLogin, token, { signal: controller.signal });			
-			console.log('Data recibida en getUser ', data);
+			
 			console.log('Datos recibidos en getUser ', data.data);
 			const user = data.data.userInfo;
 			const userTokens = data.data.userTokens;
@@ -40,7 +40,6 @@ const Login = () => {
 			console.log('userData en getUser ', user);
 			console.log('access_token tokens en getUser ', userTokens.access_token);
 						
-
 			return data.data;			
 
 		} catch (error) {

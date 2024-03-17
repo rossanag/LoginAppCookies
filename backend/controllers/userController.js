@@ -1,12 +1,10 @@
 import {getRefreshTokenHash}  from "../Utils/utils.js";
-import {setGmailUserData, setLocalUserData} from '../services/userUpdates.js';
-import { GOOGLE } from '../types/constants.js';
+import {setGmailUserData, setLocalUserData, updateUserRefreshToken, deleteUserRefreshToken, findUser} from '../services/userUpdates.js';
+import { GOOGLE} from '../types/constants.js';
 
-import User from '../model/User.js';    
 
-export const findUser = async (email) => {
-    const user = await User.findOne({ email });
-    return user;
+export const existsUser = async (id) => {    
+    return findUser(id);
 }
 
 const getHashedRefreshToken = async (refreshToken) => {
@@ -21,15 +19,7 @@ const getHashedRefreshToken = async (refreshToken) => {
 
 export const handleNewUser = async (user) => {
     //Pre: the user has been validated and doesnt exists in the database    
-    
-    /* let hashedRefreshToken = undefined;
-    try{
-        hashedRefreshToken = await getRefreshTokenHash(user.userTokens.refresh_token);
-    } catch(error) {
-        console.error('Error generating hash:', error);
-        throw error;
-    } */
-
+        
     let hashedRefreshToken = await getHashedRefreshToken(user.userTokens.refresh_token)
     
     if (user.userInfo.authMode === GOOGLE) {        
@@ -41,7 +31,7 @@ export const handleNewUser = async (user) => {
             "refreshToken": hashedRefreshToken
         };            
         console.log("gmailUserData en userController ", gmailUserData)
-         await setGmailUserData(gmailUserData);
+        await setGmailUserData(gmailUserData);
     }
     else {              
         const regularUserData = {
@@ -58,26 +48,23 @@ export const handleNewUser = async (user) => {
 }
 
 export const deleteRefreshToken = async (email) => {
-
-    console.log('Deleting refresh token from user 1', email)
-    const foundUser = await findUser(email);     
-    if (!foundUser) {
-        console.log('User not found in the database')
-        return;
-    }
-    foundUser.refreshToken = null;
-    console.log('Deleting refresh token from user ', foundUser)
-    await foundUser.save();
+    try {           
+        const user = await deleteUserRefreshToken(email)
+        console.log('User refreshToken deleted successfully:', user);
+    } catch(error) {
+        console.error('Error deleting user refreshToken:', error);
+        throw error;
+    }   
 }
 
-export const updateRefreshToken = async (user) => {
-    const foundUser = await findUser(user.userInfo.email);     
-    if (!foundUser) {
-        console.log('User not found in the database')
-        return;
-    }
-    let hashedRefreshToken = await getHashedRefreshToken(user.userTokens.refresh_token)
-
-    foundUser.refreshToken = hashedRefreshToken;
-    await foundUser.update();
+export const updateRefreshToken = async (email, refreshToken) => {
+        
+    let hashedRefreshToken = await getHashedRefreshToken(refreshToken)
+    try {          
+        const user = await updateUserRefreshToken (email, hashedRefreshToken)
+        console.log('User refreshToken updated successfully:', user);
+    } catch(error) {
+        console.error('Error updating user refreshToken:', error);
+        throw error;
+    }           
 }

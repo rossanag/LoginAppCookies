@@ -1,12 +1,12 @@
 import {Router} from 'express';
 
 import { AUTH_TYPE } from '../types/constants.js';
-import {findUser, handleNewUser, deleteRefreshToken} from '../controllers/userController.js';
+import {existsUser, handleNewUser, deleteRefreshToken, updateRefreshToken} from '../controllers/userController.js';
 import { getRefreshConfig, getUserTokenData} from '../Utils/login.js';
 import { getGmailUser } from '../controllers/gmailControllers.js';
 import { validateUserInfo } from '../schemas/user.js';
 import verifyUserAuth from '../controllers/verifyUser.js';
-
+import {verifyRefreshToken} from '../middleware/gmailMiddleware.js'
 
 // Consent screenhttps://github.com/MomenSherif/react-oauth
 //https://www.dhiwise.com/post/react-google-oauth-the-key-to-secure-and-quick-logins
@@ -49,7 +49,7 @@ gmailRouter.post('/loginGmail', async (req, res) => {
             console.log('\nObjeto de Usuario nuevo ', user)
     
             //Check if the user exists in the database
-            const foundUser = await findUser(user.userInfo.email);            
+            const foundUser = await existsUser(user.userInfo.email);            
             if (foundUser) {  
                                                 
                 console.log("User already exists in the database")
@@ -63,8 +63,7 @@ gmailRouter.post('/loginGmail', async (req, res) => {
                     authMode: GOOGLE_AUTH
                 }     
                 console.log('userData dp de logueado ', userData)
-                //console.log('tokens del usuario ', user.userTokens)
-                //console.log('Verificando usuario en verifyUserAuth');
+           
                 verifyUserAuth(userData, req, res);                
                 return;                
             } 
@@ -111,30 +110,33 @@ gmailRouter.post('/loginGmail', async (req, res) => {
         }            
 });
 
-gmailRouter.post('/refresh-token', async (req, res) => {   
+//gmailRouter.post('/refresh-token', async (req, res) => {   
+gmailRouter.post('/refresh-token', verifyRefreshToken, async (req, res) => {    
     
         const accessToken = req.headers.authorization.split(' ')[1];        
         
         try {
-            const {credentials, cookieOptions } = await getRefreshConfig(accessToken, req.cookies.refreshToken);
+            const {credentials, cookieOptions } = await getRefreshConfig(accessToken, req.cookies);
             res.cookie('refreshToken', req.cookies.refreshToken, cookieOptions);
             //update refresh token in DB
+            const emailId = {email: req.body.email};
+            updateRefreshToken (emailId, credentials.refresh_token)
             res.json(credentials);
         }
         catch (err ) {
             //delete refresh token from DB
-            res.clearCookie('refreshToken', { httpOnly: true });
-            deleteRefreshToken(req.email);
-            res.status(401).json({error: 'login again'});            
+            res.clearCookie('refreshToken', { httpOnly: true });            
+            deleteRefreshToken(req.body.email);
+            //res.status(401).json({error: 'login again'});            
+            res.redirect('/loginGmail')
         }  
         return;                          
  })    
 
 gmailRouter.post('/logoutGmail', (req, res) => {    
     console.log('Cookies en Logout: ', req.cookies)
-    console.log('req en logout', req.body.email)
-    res.clearCookie('refreshToken', { httpOnly: true });
-    console.log('req.mail en logout ', req.body.email)
+    
+    res.clearCookie('refreshToken', { httpOnly: true });     
     deleteRefreshToken(req.body.email);
     console.log('Logout de Gmail')            
     res.send('SERVER:Logged out - Google');            

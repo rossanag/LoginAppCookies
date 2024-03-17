@@ -3,7 +3,6 @@
 import { UserData } from '../types';
 import { apiGoogle } from './apiAxios';
 
-
 const logoutGmail =  async () => {
 	
 	const urlLogout = (import.meta.env.VITE_SERVER_ENDPOINT as string) + '/protected/logoutGmail'; 

@@ -1,6 +1,7 @@
 import { GOOGLE, EMPTY_STRING } from '../types/constants.js';
+import {updateUserRefreshToken} from '../services/userUpdates.js';
 import { validateRefreshToken } from '../Utils/login.js';
-import {updateRefreshToken} from '../services/userUpdates.js';
+
 
 function verifyUserAuth(userData, req, res) { 
 
@@ -10,7 +11,7 @@ function verifyUserAuth(userData, req, res) {
 
     if  ((!receivedRefreshToken) && (userSaved.refreshToken === EMPTY_STRING)) {
         console.log('Refresh token is not valid') 
-        updateRefreshToken(userSaved.email,newRefreshToken );
+        updateUserRefreshToken(userSaved.userInfo,newRefreshToken );
         return res.status(403).json({ error: 'login' });
     }
     
@@ -21,7 +22,9 @@ function verifyUserAuth(userData, req, res) {
         
         try {
             res.clearCookie('refreshToken', { httpOnly: true });
-            updateRefreshToken(userSaved.email, newRefreshToken);            
+            
+            const idUser = {email: userSaved.email}
+            updateUserRefreshToken(idUser, newRefreshToken);            
             //return res.status(401).json({ error: 'login' });
             //return res.redirect('/login');
             userSaved.refreshToken = newRefreshToken;

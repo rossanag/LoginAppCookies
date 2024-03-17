@@ -1,21 +1,13 @@
 import mongoose from 'mongoose';
-import User from '../model/User.js';    
 
-export async function updateRefreshToken(email, newRefreshToken) {
-  try {
-    const result = await User.updateOne(
-      { email: email },
-      { $set: { refreshToken: newRefreshToken } }
-    );
+import { EMPTY_STRING } from '../types/constants.js';
+import User from '../model/User.js';   
 
-    console.log('User refreshToken updated successfully:', result);
-    // Handle success
-    return result;
-  } catch (err) {
-        console.error('Error updating user refreshToken:', err);
-        // Handle the error
-        throw err;
-  }
+
+export const findUser = async (email) => {
+  
+  const user = await User.findOne({email });
+  return user;
 }
 
 export const setGmailUserData = async (gmailUserData) => {
@@ -48,5 +40,35 @@ export const setLocalUserData = async (regularUserData) => {
     }
   });
 }
-  
 
+export const updateUserRefreshToken = async (email, hashedRefreshToken) => {  
+    
+  const userDB = mongoose.model('User');
+  //const emailString = String(email);
+  const filter = { email: email };
+
+  const update = { refreshToken: hashedRefreshToken };
+  const options = { new: true };
+
+  try {
+    const result = await userDB.findOneAndUpdate(filter, update, options);
+    return result;
+  } catch (error) {
+      console.error('Error updating Gmail user refreshToken:', error);
+      const err = new Error('Error updating the user:', error);
+      throw err
+  } 
+}
+
+export const deleteUserRefreshToken = async (userId) => {
+  try{        
+      const userDb = await updateUserRefreshToken (userId, EMPTY_STRING)
+      console.log('User refreshToken updated successfully:', userDb);
+      return userDb;
+      
+  } catch(error) {
+      console.error('Error deleting refresh token:', error);
+      throw error;
+  
+  }
+}

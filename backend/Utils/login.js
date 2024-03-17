@@ -121,7 +121,24 @@ export const getUserTokenData = async (code) => {
     
     return {tokens, tokenInfo}    
 }
-        
 
+
+export async function verifyToken(token) {
+  const oAuth2Client = getGmailAuth();
+  try {
+    const ticket = await oAuth2Client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    if (payload.aud === process.env.GOOGLE_CLIENT_ID) {
+      return payload;
+    } else {
+      throw new Error('Token is not issued for this client ID');
+    }
+  } catch (error) {
+    throw new Error('Invalid token');
+  }
+}
 
         

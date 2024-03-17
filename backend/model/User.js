@@ -17,7 +17,7 @@ const UserSchema = new Schema({
         unique: true,
         match: [/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/, 'Invalid email address']
     },    
-    
+   
     refreshToken: {
         type: String,        
         required: false

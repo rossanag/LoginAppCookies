@@ -8,7 +8,7 @@ const errorMessages = {
 };
 
 export const handleError = (err, req, res, next) => {
-    const errorMessage = errorMessages[err.statusCode] || 'Please, try again later.';
+    const errorMessage = errorMessages[err.statusCode] + 'Please, try again later.';
     console.error(errorMessage, err);
     if (err.status === 401) {
         res.clearCookie('refreshToken', { httpOnly: true });

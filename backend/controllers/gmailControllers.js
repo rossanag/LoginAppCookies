@@ -2,11 +2,6 @@ import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import { GOOGLE } from '../types/constants.js';
 
-//import fetch from 'node-fetch';
-  /* const User = require('../model/User');
-  const bcrypt = require('bcrypt');
-  const jwt = require('jsonwebtoken');
-   */
 export const handleGmailLogin = async (req, res) => {
       const cookies = req.cookies;
   
