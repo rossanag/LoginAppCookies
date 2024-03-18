@@ -142,5 +142,10 @@ gmailRouter.post('/logoutGmail', (req, res) => {
     res.send('SERVER:Logged out - Google');            
     return;
 });
+
+gmailRouter.post('/otra', async (req, res) => {  
+    res.send('This is OTRA page data from server').status(200)
+  });
+
   
 export default gmailRouter;

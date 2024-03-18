@@ -48,12 +48,18 @@ const Navbar = () => {
 						className={({ isActive }) => (isActive ? activeLink : normalLink)}
 					>
 						<p className="border w-full h-full px-4 centered">Profile</p>
-					</NavLink>					
+					</NavLink>	
 					<NavLink
 						to="/about"
 						className={({ isActive }) => (isActive ? activeLink : normalLink)}
 					>
 						<p className="border w-full h-full px-4 centered">About</p>
+					</NavLink>														
+					<NavLink
+						to="/otra"
+						className={({ isActive }) => (isActive ? activeLink : normalLink)}
+					>
+						<p className="border w-full h-full px-4 centered">Otra</p>
 					</NavLink>					
 					{isLogged && 
 						<NavLink

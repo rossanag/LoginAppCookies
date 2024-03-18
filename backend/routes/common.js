@@ -9,4 +9,3 @@ const createCommonRoutes = (app) => {
 }
 
 export default createCommonRoutes;
-  

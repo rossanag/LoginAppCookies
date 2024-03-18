@@ -9,6 +9,7 @@ import Profile from './Profile';
 
 import {UserData} from './../types';
 import { useLocalStorage } from '../hooks';
+import Otra from './Otra';
 
 
 const LandingPage = () => {
@@ -37,12 +38,12 @@ const LandingPage = () => {
 				<Routes>											
 					<Route element={ <Dashboard /> }>
 						<Route
-							//path="index.html"
+							path="index.html"
 							element={user ? <ProtectedRoute>
 								<Home />
 							</ProtectedRoute> :<Navigate to = "/"/> } />								
 						<Route
-							//path="index.html"
+							path="index.html"
 							element={user ? <Navigate to = "/home"/> :<LoginGoogle/> } />																										
 						<Route
 							path="home"
@@ -53,12 +54,17 @@ const LandingPage = () => {
 							path="profile"
 							element={<ProtectedRoute>
 								<Profile />
-							</ProtectedRoute>} />	
+							</ProtectedRoute>} />							
 						<Route
 							path="about"
 							element={<ProtectedRoute>
 								<About />
-							</ProtectedRoute>} />		
+							</ProtectedRoute>} />	
+						<Route
+							path="otra"
+							element={<ProtectedRoute>
+								<Otra />
+							</ProtectedRoute>} />						
 						<Route
 							path="logout"
 							element={<ProtectedRoute>
