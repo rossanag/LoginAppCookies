@@ -71,7 +71,7 @@ export const verifyGmailAccessToken = async (req, res, next) => {
 export const verifyRefreshToken = async (req, res, next) => {
     try {
         const response = await axios.post('https://oauth2.googleapis.com/token', {
-            refresh_token: req.cookies,
+            refresh_token: req.cookies.refresToken,
             client_id: process.env.CLIENT_ID,
             client_secret: process.env.CLIENT_SECRET,
             grant_type: 'refresh_token'

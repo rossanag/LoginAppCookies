@@ -13,6 +13,8 @@ import {verifyRefreshToken} from '../middleware/gmailMiddleware.js'
 
 //https://mrbytebuster.medium.com/oauth-2-0-using-node-js-249d7b67257S
 // https://github.com/shaikahmadnawaz/access-refresh-tokens-nodejs/blob/master/src/controllers/user.controller.js
+
+
 const gmailRouter = Router();
 
 gmailRouter.get('/oauth2callback', async (req, res) => {    
@@ -42,7 +44,8 @@ gmailRouter.post('/loginGmail', async (req, res) => {
         let user = undefined
         try {
            
-            console.log("tokenInfo, ", tokenInfo);       
+            console.log("tokenInfo, ", tokenInfo); 
+            console.log("Tokens obtenidos en loginGmail ", tokens)      
             
             user = await getGmailUser(tokens);
             
@@ -55,18 +58,30 @@ gmailRouter.post('/loginGmail', async (req, res) => {
                 console.log("User already exists in the database")
                 const { GOOGLE_AUTH } = AUTH_TYPE;
 
-                console.log('***req.cookies ', req.cookies);                
+                console.log('***req.cookies ', req.cookies.refreshToken);                
+                console.log('***user.userTokens.refresh_token ', user.userTokens.refresh_token);
                 const  userData = {
                     userSaved: foundUser,
-                    newRefreshToken: tokens.refresh_token,
-                    receivedRefreshToken: req.cookies,
+                    newRefreshToken: user.userTokens.refresh_token,
+                    receivedRefreshToken: req.cookies.refreshToken,
                     authMode: GOOGLE_AUTH
                 }     
                 console.log('userData dp de logueado ', userData)
            
-                verifyUserAuth(userData, req, res);                
-                return;                
+                await verifyUserAuth(userData, req, res);                
+                
+                const today = new Date(); 
+                res.cookie('refreshToken', tokens.refresh_token, {
+                    secure: true, // Cookie only sent in https
+                    httpOnly: true, // Cookie cannot be accessed by JavaScript
+                    sameSite: 'None',
+                    //maxAge: tokenInfo.expiry_date * 1000,
+                    expires: new Date(today.getFullYear(), today.getMonth() + 6)  //** */
+                });
+                console.log('User already exists in the database. usuario modificado')
+                return res.status(200).json(user);                
             } 
+            else {console.log('USUARIO NUEVO\n')}
                         
             // New user
 
@@ -103,8 +118,7 @@ gmailRouter.post('/loginGmail', async (req, res) => {
                 }
                 return res.status(409).json({ error: 'Error creating the user' });
             }
-        }                        
-        catch(err) {
+        } catch(err) {
             console.log('Error when logging', err);
             return res.status(500).send("Please, log again");
         }            
@@ -116,7 +130,7 @@ gmailRouter.post('/refresh-token', verifyRefreshToken, async (req, res) => {
         const accessToken = req.headers.authorization.split(' ')[1];        
         
         try {
-            const {credentials, cookieOptions } = await getRefreshConfig(accessToken, req.cookies);
+            const {credentials, cookieOptions } = await getRefreshConfig(accessToken, req.cookies.refreshToken);
             res.cookie('refreshToken', req.cookies.refreshToken, cookieOptions);
             //update refresh token in DB
             const emailId = {email: req.body.email};
@@ -134,7 +148,7 @@ gmailRouter.post('/refresh-token', verifyRefreshToken, async (req, res) => {
  })    
 
 gmailRouter.post('/logoutGmail', (req, res) => {    
-    console.log('Cookies en Logout: ', req.cookies)
+    console.log('Cookies en Logout: ', req.cookies.refreshToken)
     
     res.clearCookie('refreshToken', { httpOnly: true });     
     deleteRefreshToken(req.body.email);
@@ -144,6 +158,7 @@ gmailRouter.post('/logoutGmail', (req, res) => {
 });
 
 gmailRouter.post('/otra', async (req, res) => {  
+    console.log('Cookies en otra: ', req.cookies.refreshToken)
     res.send('This is OTRA page data from server').status(200)
   });
 
