@@ -19,7 +19,7 @@ const getHashedRefreshToken = async (refreshToken) => {
 
 export const handleNewUser = async (user) => {
     //Pre: the user has been validated and doesnt exists in the database    
-     console.log("HANDLE NEW USER". user)   
+     
     let hashedRefreshToken = await getHashedRefreshToken(user.userTokens.refresh_token)
     
     if (user.userInfo.authMode === GOOGLE) {        

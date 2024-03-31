@@ -129,12 +129,13 @@ gmailRouter.post('/refresh-token', verifyRefreshToken, async (req, res) => {
     
         const accessToken = req.headers.authorization.split(' ')[1];        
         
+        
         try {
             const {credentials, cookieOptions } = await getRefreshConfig(accessToken, req.cookies.refreshToken);
             res.cookie('refreshToken', req.cookies.refreshToken, cookieOptions);
             //update refresh token in DB
-            const emailId = {email: req.body.email};
-            updateRefreshToken (emailId, credentials.refresh_token)
+            const email = req.body.email;
+            updateRefreshToken (email, credentials.refresh_token)
             res.json(credentials);
         }
         catch (err ) {
@@ -159,7 +160,7 @@ gmailRouter.post('/logoutGmail', (req, res) => {
 
 gmailRouter.post('/otra', async (req, res) => {  
     console.log('Cookies en otra: ', req.cookies.refreshToken)
-    res.send('This is OTRA page data from server').status(200)
+    res.send('OTRA - page data from server').status(200)
   });
 
   

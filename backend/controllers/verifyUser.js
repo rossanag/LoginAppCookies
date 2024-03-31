@@ -5,30 +5,16 @@ import { getRefreshTokenHash } from '../Utils/utils.js';
 
 
 async function verifyUserAuth(userData, req, res) { 
-    console.log("Entre a verifyUserAuth")
+    
     const { userSaved, newRefreshToken, authMode, receivedRefreshToken } = userData;            
-    console.log("authMode en verifyUserAuth ", authMode)
-    console.log("userSaved en verifyUserAuth ", userSaved)
-    console.log("newRefreshToken en verifyUserAuth ", newRefreshToken)
-
+    
     if  (userSaved.refreshToken === EMPTY_STRING) {        
         console.log('Refresh token is not valid, either not received or not saved in DB') 
         let hashedRefreshToken = await getRefreshTokenHash(newRefreshToken);
         //userSaved.refreshToken = hashedRefreshToken;
-        console.log('hashed refreshtpken en verifyUserAuth ', hashedRefreshToken)
+       
         updateUserRefreshToken(userSaved.email,hashedRefreshToken );
-        
-        //const today = new Date(); //** */
-        //        res.cookie('refreshToken', newRefreshToken, {                         
-        //            secure: true, // Cookie only sent in https
-        //            httpOnly: true, // Cookie cannot be accessed by JavaScript
-        //            sameSite: 'None',
-        //            //maxAge: tokenInfo.expiry_date * 1000,
-        //            expires: new Date(today.getFullYear(), today.getMonth() + 6)  //** */
-        //        });
-            
-        //return res.status(403).json({ error: 'login' });
-        //return res.status(200).json(userSaved);                   
+                
         return;
     }
     
@@ -44,22 +30,10 @@ async function verifyUserAuth(userData, req, res) {
             const {email } = userSaved;
             let hashedRefreshToken = getUserToRefreshToken(newRefreshToken);
             userSaved.refreshToken = hashedRefreshToken;
-            updateUserRefreshToken(email, hashedRefreshToken);            
-            console.log('Refresh token updated in DB for existent user')
-            //return res.status(401).json({ error: 'login' });
-            //return res.redirect('/login');
+            updateUserRefreshToken(email, hashedRefreshToken);                    
+        
             userSaved.refreshToken = hashedRefreshToken;
-            
-            //const today = new Date(); 
-            //res.cookie('refreshToken', newRefreshToken, {
-            //    secure: true, // Cookie only sent in https
-            //    httpOnly: true, // Cookie cannot be accessed by JavaScript
-            //    sameSite: 'None',
-            //    //maxAge: tokenInfo.expiry_date * 1000,
-            //    expires: new Date(today.getFullYear(), today.getMonth() + 6)  //** */
-            //});
-
-            //return res.status(200).json(userSaved);                   
+                        
             return
            
         }
