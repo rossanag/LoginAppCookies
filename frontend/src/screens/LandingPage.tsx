@@ -10,6 +10,7 @@ import Profile from './Profile';
 import {UserData} from './../types';
 import { useLocalStorage } from '../hooks';
 import Otra from './Otra';
+import Login from './Login';
 
 
 const LandingPage = () => {
@@ -75,7 +76,8 @@ const LandingPage = () => {
 						{/* <Route path="*" element={<NotFound/>}/>  */}
 					</Route>
 					<Route element = {<LoginDash/>}>						
-						<Route path="/" element={ <AnonymousRoute><LoginGoogle /></AnonymousRoute> }/>
+						{/* <Route path="/" element={ <AnonymousRoute><LoginGoogle /></AnonymousRoute> }/> */}
+						<Route path="/" element={ <AnonymousRoute><Login /></AnonymousRoute> }/>
 					</Route>
 					<Route path="*" element={<NotFound/>}/>						
 					
